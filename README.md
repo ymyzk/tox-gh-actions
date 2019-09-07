@@ -1,5 +1,9 @@
 # tox-gh-actions
-Seamless integration of tox into GitHub Actions
+Seamless integration of tox into GitHub Actions.
+
+tox-gh-actions is a tox plugin which helps running tox on GitHub Actions
+with multiple different Python versions.  This project is inspired by
+[tox-travis](https://github.com/tox-dev/tox-travis).
 
 ## Usage
 `tox.ini`:
