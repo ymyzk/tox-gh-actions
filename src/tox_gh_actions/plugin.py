@@ -29,7 +29,7 @@ def tox_configure(config):
     verbosity0("section: {}".format(section))
     python = parse_dict(section.get('python', ''))
     verbosity0("python: {}".format(python))
-    envlist = python.get(python, [])
+    envlist = python.get(version, [])
     verbosity0("envlist: {}".format(envlist))
     verbosity0("envlist: {}".format(config.envlist))
     verbosity0("envlist_default: {}".format(config.envlist_default))
