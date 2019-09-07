@@ -29,10 +29,12 @@ def tox_configure(config):
     verbosity0("section: {}".format(section))
     python = parse_dict(section.get('python', ''))
     verbosity0("python: {}".format(python))
+    verbosity0("original envlist: {}".format(config.envlist))
+    verbosity0("original envlist_default: {}".format(config.envlist_default))
     envlist = python.get(version, [])
-    verbosity0("envlist: {}".format(envlist))
-    verbosity0("envlist: {}".format(config.envlist))
-    verbosity0("envlist_default: {}".format(config.envlist_default))
+    # TODO: Apply the change only on GitHub Actions
+    verbosity0("new envlist: {}".format(envlist))
+    config.envlist_default = config.envlist = envlist
 
 
 @hookimpl
