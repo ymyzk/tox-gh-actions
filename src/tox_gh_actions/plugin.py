@@ -1,46 +1,32 @@
+import os
 import sys
 
 import pluggy
 from tox.config import _split_env as split_env
-from tox.reporter import verbosity0
+from tox.reporter import verbosity0, verbosity2
+
 
 hookimpl = pluggy.HookimplMarker("tox")
 
 
 @hookimpl
-def tox_addoption(parser):
-    """Add a command line option for later use"""
-    parser.add_argument("--magic", action="store", help="this is a magical option")
-    parser.add_testenv_attribute(
-        name="cinderella",
-        type="string",
-        default="not here",
-        help="an argument pulled from the tox.ini",
-    )
-
-
-@hookimpl
 def tox_configure(config):
     """Access your option during configuration"""
-    verbosity0("Python version is: {}".format(sys.version_info))
     version = '.'.join([str(i) for i in sys.version_info[:2]])
-    verbosity0("flag magic is: {}".format(config.option.magic))
+    verbosity2("Python version: {}".format(version))
+
     ini = config._cfg
-    section = ini.sections.get('gh-actions', {})
-    verbosity0("section: {}".format(section))
-    python = parse_dict(section.get('python', ''))
-    verbosity0("python: {}".format(python))
-    verbosity0("original envlist: {}".format(config.envlist))
-    verbosity0("original envlist_default: {}".format(config.envlist_default))
-    envlist = split_env(python.get(version, ""))
-    # TODO: Apply the change only on GitHub Actions
-    verbosity0("new envlist: {}".format(envlist))
+    section = ini.sections.get("gh-actions", {})
+    python_envlist = parse_dict(section.get("python", ""))
+    verbosity2("original envlist: {}".format(config.envlist))
+    verbosity2("original envlist_default: {}".format(config.envlist_default))
+    envlist = split_env(python_envlist.get(version, ""))
+    verbosity2("new envlist: {}".format(envlist))
+    if "GITHUB_ACTION" not in os.environ:
+        verbosity0("tox is not running in GitHub Actions")
+        verbosity0("tox-gh-actions won't override envlist")
+        return
     config.envlist_default = config.envlist = envlist
-
-
-@hookimpl
-def tox_runtest_post(venv):
-    verbosity0("cinderella is {}".format(venv.envconfig.cinderella))
 
 
 # From https://github.com/tox-dev/tox-travis/blob/master/src/tox_travis/utils.py
