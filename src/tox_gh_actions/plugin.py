@@ -21,6 +21,7 @@ def tox_configure(config):
     verbosity2("original envlist: {}".format(config.envlist))
     verbosity2("original envlist_default: {}".format(config.envlist_default))
     envlist = split_env(python_envlist.get(version, ""))
+    envlist = list(set(envlist) & set(config.envlist))
     verbosity2("new envlist: {}".format(envlist))
     if "GITHUB_ACTION" not in os.environ:
         verbosity0("tox is not running in GitHub Actions")
