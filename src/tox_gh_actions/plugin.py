@@ -22,12 +22,15 @@ def tox_addoption(parser):
 def tox_configure(config):
     """Access your option during configuration"""
     verbosity0("Python version is: {}".format(sys.version_info))
+    version = '.'.join([str(i) for i in sys.version_info[:2]])
     verbosity0("flag magic is: {}".format(config.option.magic))
     ini = config._cfg
     section = ini.sections.get('gh-actions', {})
     verbosity0("section: {}".format(section))
     python = parse_dict(section.get('python', ''))
     verbosity0("python: {}".format(python))
+    envlist = python.get(python, [])
+    verbosity0("envlist: {}".format(envlist))
     verbosity0("envlist: {}".format(config.envlist))
     verbosity0("envlist_default: {}".format(config.envlist_default))
 
