@@ -1,6 +1,7 @@
 import sys
 
 import pluggy
+from tox.config import _split_env as split_env
 from tox.reporter import verbosity0
 
 hookimpl = pluggy.HookimplMarker("tox")
@@ -31,7 +32,7 @@ def tox_configure(config):
     verbosity0("python: {}".format(python))
     verbosity0("original envlist: {}".format(config.envlist))
     verbosity0("original envlist_default: {}".format(config.envlist_default))
-    envlist = python.get(version, [])
+    envlist = split_env(python.get(version, ""))
     # TODO: Apply the change only on GitHub Actions
     verbosity0("new envlist: {}".format(envlist))
     config.envlist_default = config.envlist = envlist
