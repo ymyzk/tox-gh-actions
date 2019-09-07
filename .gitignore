@@ -1,0 +1,14 @@
+.eggs
+.cache
+.python-version
+.idea
+*.pyc
+*.dist-info
+.coverage
+*.egg-info
+/.tox
+/dist
+/.*_cache
+/pip-wheel-metadata
+/src/tox_gh_actions/version.py
+/build
