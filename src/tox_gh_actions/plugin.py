@@ -1,3 +1,5 @@
+import sys
+
 import pluggy
 from tox.reporter import verbosity0
 
@@ -19,6 +21,7 @@ def tox_addoption(parser):
 @hookimpl
 def tox_configure(config):
     """Access your option during configuration"""
+    verbosity0("Python version is: {}".format(sys.version_info))
     verbosity0("flag magic is: {}".format(config.option.magic))
 
 
