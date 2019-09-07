@@ -28,6 +28,8 @@ def tox_configure(config):
     verbosity0("section: {}".format(section))
     python = section.get('python', {})
     verbosity0("python: {}".format(python))
+    verbosity0("envlist: {}".format(config.envlist))
+    verbosity0("envlist_default: {}".format(config.envlist_default))
 
 
 @hookimpl
