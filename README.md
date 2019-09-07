@@ -1,59 +1,47 @@
-[![Latest version on
-PyPi](https://badge.fury.io/py/gh-actions.svg)](https://badge.fury.io/py/gh-actions)
-[![Supported Python
-versions](https://img.shields.io/pypi/pyversions/gh-actions.svg)](https://pypi.org/project/gh-actions/)
-[![Azure Pipelines build
-status](https://dev.azure.com/ymyzk/gh-actions/_apis/build/status/tox%20ci?branchName=master)](https://dev.azure.com/ymyzk/gh-actions/_build/latest?definitionId=9&branchName=master)
-[![Documentation
-status](https://readthedocs.org/projects/gh-actions/badge/?version=latest&style=flat-square)](https://gh-actions.readthedocs.io/en/latest/?badge=latest)
-[![Code style:
-black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black)
+# tox-gh-actions
+Seamless integration of tox into GitHub Actions
 
-# gh-actions
+## Usage
+`tox.ini`:
+```ini
+[tox]
+envlist = py27, py35, py36, py37, mypy
 
-A simple plugin to use with tox
+[gh-actions]
+python =
+    2.7: py27
+    3.5: py35
+    3.6: py36
+    3.7: py37, mypy
 
-Features
---------
-
-* TODO
-
-
-Requirements
-------------
-
-* TODO
-
-
-Installation
-------------
-
-You can install "tox-gh-actions" via [pip](https://pypi.org/project/pip/) from [PyPI](https://pypi.org):
-
-```
-pip install tox-gh-actions
+[testenv]
+...
 ```
 
-Usage
------
+`.github/workflows/<workflow>.yml`:
+```yaml
+name: Python package
 
-* TODO
+on: [push]
 
-Contributing
-------------
-Contributions are very welcome. Tests can be run with [tox](https://tox.readthedocs.io/en/latest/), please ensure
-the coverage at least stays the same before you submit a pull request.
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: [2.7, 3.5, 3.6, 3.7]
 
-License
--------
-
-Distributed under the terms of the **MIT** license, `tox-gh-actions` is
-free and open source software.
-
-
-Issues
-------
-
-If you encounter any problems, please
-[file an issue](https://github.com/ymyzk/tox-gh-actions/issues)
-along with a detailed description.
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install tox tox-gh-actions
+    - name: Test with tox
+      run: tox
+```
