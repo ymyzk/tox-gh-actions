@@ -1,9 +1,10 @@
+from copy import deepcopy
 import os
 import sys
 
 import pluggy
 from tox.config import _split_env as split_env
-from tox.reporter import verbosity0, verbosity2
+from tox.reporter import verbosity1, verbosity2
 
 
 hookimpl = pluggy.HookimplMarker("tox")
@@ -11,23 +12,37 @@ hookimpl = pluggy.HookimplMarker("tox")
 
 @hookimpl
 def tox_configure(config):
+    verbosity2("original envlist: {}".format(config.envlist))
+    verbosity2("original envlist_default: {}".format(config.envlist_default))
+
     version = '.'.join([str(i) for i in sys.version_info[:2]])
     verbosity2("Python version: {}".format(version))
 
-    ini = config._cfg
-    section = ini.sections.get("gh-actions", {})
-    python_envlist = parse_dict(section.get("python", ""))
-    verbosity2("original envlist: {}".format(config.envlist))
-    verbosity2("original envlist_default: {}".format(config.envlist_default))
-    envlist = split_env(python_envlist.get(version, ""))
-    envlist = list(set(envlist) & set(config.envlist))
+    gh_actions_config = parse_config(config._cfg.sections.get("gh-actions", {}))
+    verbosity2("tox-gh-actions config: {}".format(gh_actions_config))
+
+    factors = gh_actions_config["python"].get(version, [])
+    envlist = get_envlist_from_factors(config.envlist, factors)
     verbosity2("new envlist: {}".format(envlist))
 
     if "GITHUB_ACTION" not in os.environ:
-        verbosity0("tox is not running in GitHub Actions")
-        verbosity0("tox-gh-actions won't override envlist")
+        verbosity1("tox is not running in GitHub Actions")
+        verbosity1("tox-gh-actions won't override envlist")
         return
     config.envlist_default = config.envlist = envlist
+
+
+def parse_config(config):
+    """Parse gh-actions section in tox.ini"""
+    config = deepcopy(config)
+    config["python"] = parse_dict(config.get("python", ""))
+    for k, v in config["python"].items():
+        config["python"][k] = split_env(v)
+    return config
+
+
+def get_envlist_from_factors(envlist, factors):
+    return list(sorted(set(factors) & set(envlist)))
 
 
 # The following function was copied from
