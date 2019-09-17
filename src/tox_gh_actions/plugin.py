@@ -42,7 +42,14 @@ def parse_config(config):
 
 
 def get_envlist_from_factors(envlist, factors):
-    return list(sorted(set(factors) & set(envlist)))
+    result = []
+    for env in envlist:
+        for factor in factors:
+            env_facts = env.split("-")
+            if all(f in env_facts for f in factor.split("-")):
+                result.append(env)
+                break
+    return result
 
 
 # The following function was copied from

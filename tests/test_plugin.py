@@ -33,7 +33,7 @@ def test_parse_config(config, expected):
     (
         ['py27', 'py37', 'flake8'],
         ['py37', 'flake8'],
-        ['flake8', 'py37'],
+        ['py37', 'flake8'],
     ),
     (
         ['py27', 'py37', 'flake8'],
@@ -44,6 +44,11 @@ def test_parse_config(config, expected):
         [],
         ['py37', 'flake8'],
         [],
+    ),
+    (
+        ['py27-dj111', 'py37-dj111', 'py37-dj20', 'flake8'],
+        ['py37', 'flake8'],
+        ['py37-dj111', 'py37-dj20', 'flake8'],
     ),
 ])
 def test_get_envlist_from_factors(envlist, factors, expected):

@@ -49,3 +49,18 @@ jobs:
     - name: Test with tox
       run: tox
 ```
+
+## Advanced Usage
+`tox.ini`:
+```ini
+[tox]
+envlist = py27-django{111}, py37-django{111,20}
+
+[gh-actions]
+python =
+    2.7: py27
+    3.7: py37
+
+[testenv]
+...
+```
