@@ -1,5 +1,6 @@
 # tox-gh-actions
 [![PyPI version](https://badge.fury.io/py/tox-gh-actions.svg)](https://badge.fury.io/py/tox-gh-actions)
+[![GitHub license](https://img.shields.io/github/license/ymyzk/tox-gh-actions)](https://github.com/ymyzk/tox-gh-actions/blob/master/LICENSE)
 
 **tox-gh-actions** is a tox plugin which helps running tox on GitHub Actions
 with multiple different Python versions.  This project is inspired by
