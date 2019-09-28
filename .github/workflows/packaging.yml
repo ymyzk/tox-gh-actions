@@ -1,6 +1,11 @@
-name: Python package
+name: Packaging
 
-on: [push, release]
+on:
+  # Make sure packaging process is not broken
+  push:
+  # Make a package for release
+  release:
+    types: [published]
 
 jobs:
   build:
@@ -24,5 +29,5 @@ jobs:
       run: python setup.py sdist bdist_wheel
     - uses: actions/upload-artifact@master
       with:
-        name: dist
+        name: tox-gh-actions-dist
         path: dist
