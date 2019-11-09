@@ -1,6 +1,6 @@
 # tox-gh-actions
 [![PyPI version](https://badge.fury.io/py/tox-gh-actions.svg)](https://badge.fury.io/py/tox-gh-actions)
-[![PyPI Supported Python Versions](https://img.shields.io/pypi/pyversions/wsgi_lineprof.svg)](https://pypi.python.org/pypi/wsgi-lineprof/)
+[![PyPI Supported Python Versions](https://img.shields.io/pypi/pyversions/tox-gh-actions.svg)](https://pypi.python.org/pypi/tox-gh-actions/)
 [![GitHub license](https://img.shields.io/github/license/ymyzk/tox-gh-actions)](https://github.com/ymyzk/tox-gh-actions/blob/master/LICENSE)
 [![GitHub Actions (Tests)](https://github.com/ymyzk/tox-gh-actions/workflows/Tests/badge.svg)](https://github.com/ymyzk/tox-gh-actions)
 
