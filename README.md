@@ -11,21 +11,21 @@ with multiple different Python versions.  This project is inspired by
 ## Usage
 The following configuration will create 4 jobs when running the workflow on GitHub Actions.
 - On Python 2.7 job, tox runs `py27` environment
-- On Python 3.5 job, tox runs `py35` environment
 - On Python 3.6 job, tox runs `py36` environment
-- On Python 3.7 job, tox runs `py37` and `mypy` environments
+- On Python 3.7 job, tox runs `py37` environment
+- On Python 3.8 job, tox runs `py38` and `mypy` environments
 
 `tox.ini`:
 ```ini
 [tox]
-envlist = py27, py35, py36, py37, mypy
+envlist = py27, py36, py37, py38, mypy
 
 [gh-actions]
 python =
     2.7: py27
-    3.5: py35
     3.6: py36
-    3.7: py37, mypy
+    3.7: py37
+    3.8: py38, mypy
 
 [testenv]
 ...
@@ -43,7 +43,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: [2.7, 3.5, 3.6, 3.7]
+        python-version: [2.7, 3.6, 3.7, 3.8]
 
     steps:
     - uses: actions/checkout@v1
