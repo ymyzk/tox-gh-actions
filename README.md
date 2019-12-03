@@ -15,14 +15,17 @@ with multiple different Python versions.  This project is inspired by
 2. Install `tox-gh-actions` package in the GitHub Actions workflow before running `tox` command.
 
 ## Examples
-### Simple Example
+### Basic Example
 The following configuration will create 4 jobs when running the workflow on GitHub Actions.
 - On Python 2.7 job, tox runs `py27` environment
 - On Python 3.6 job, tox runs `py36` environment
 - On Python 3.7 job, tox runs `py37` environment
 - On Python 3.8 job, tox runs `py38` and `mypy` environments
 
-`tox.ini`:
+#### tox-gh-actions Configuration
+Add `[gh-actions]` section to the same file as tox's cofiguration.
+
+If you're using `tox.ini`:
 ```ini
 [tox]
 envlist = py27, py36, py37, py38, mypy
@@ -38,6 +41,41 @@ python =
 ...
 ```
 
+If you're using `setup.cfg`:
+```ini
+[tox:tox]
+envlist = py27, py36, py37, py38, mypy
+
+[gh-actions]
+python =
+    2.7: py27
+    3.6: py36
+    3.7: py37
+    3.8: py38, mypy
+
+[testenv]
+...
+```
+
+If you're using `pyproject.toml`:
+```toml
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+envlist = py27, py36, py37, py38, mypy
+
+[gh-actions]
+python =
+    2.7: py27
+    3.6: py36
+    3.7: py37
+    3.8: py38, mypy
+
+[testenv]
+"""
+```
+
+#### Workflow Configuration
 `.github/workflows/<workflow>.yml`:
 ```yaml
 name: Python package
