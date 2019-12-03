@@ -9,10 +9,10 @@ with multiple different Python versions.  This project is inspired by
 [tox-travis](https://github.com/tox-dev/tox-travis).
 
 ## Usage
-The following configuration will create 4 jobs when running the worlflow on GitHub Actions.
+The following configuration will create 4 jobs when running the workflow on GitHub Actions.
 - On Python 2.7 job, tox runs `py27` environment
-- On Python 3.5 job, tox runs `py34` environment
-- On Python 3.6 job, tox runs `py35` environment
+- On Python 3.5 job, tox runs `py35` environment
+- On Python 3.6 job, tox runs `py36` environment
 - On Python 3.7 job, tox runs `py37` and `mypy` environments
 
 `tox.ini`:
@@ -60,7 +60,7 @@ jobs:
 ```
 
 ## Advanced Usage
-The following configuration will create 2 jobs when running the worlflow on GitHub Actions.
+The following configuration will create 2 jobs when running the workflow on GitHub Actions.
 - On Python 2.7 job, tox runs `py27-django111` environment
 - On Python 3.7 job, tox runs `py37-django111` and `py37-django20` environments
 
