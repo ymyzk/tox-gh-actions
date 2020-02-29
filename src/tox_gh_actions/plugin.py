@@ -1,9 +1,10 @@
 from copy import deepcopy
 import os
 import sys
+from typing import Any, Dict, Iterable, List
 
 import pluggy
-from tox.config import _split_env as split_env
+from tox.config import Config, _split_env as split_env
 from tox.reporter import verbosity1, verbosity2
 
 
@@ -12,6 +13,7 @@ hookimpl = pluggy.HookimplMarker("tox")
 
 @hookimpl
 def tox_configure(config):
+    # type: (Config) -> None
     verbosity2("original envconfigs: {}".format(list(config.envconfigs.keys())))
     verbosity2("original envlist: {}".format(config.envlist))
     verbosity2("original envlist_default: {}".format(config.envlist_default))
@@ -34,6 +36,7 @@ def tox_configure(config):
 
 
 def parse_config(config):
+    # type: (Dict[str, Any]) -> Dict[str, Dict[str, List[str]]]
     """Parse gh-actions section in tox.ini"""
     config = deepcopy(config)
     config["python"] = parse_dict(config.get("python", ""))
@@ -43,6 +46,7 @@ def parse_config(config):
 
 
 def get_envlist_from_factors(envlist, factors):
+    # type: (Iterable[str], Iterable[str]) -> List[str]
     result = []
     for env in envlist:
         for factor in factors:
@@ -59,6 +63,7 @@ def get_envlist_from_factors(envlist, factors):
 # https://github.com/tox-dev/tox-travis/blob/0.12/LICENSE
 
 def parse_dict(value):
+    # type: (str) -> Dict[str, str]
     """Parse a dict value from the tox config.
     .. code-block: ini
         [travis]
