@@ -1,7 +1,6 @@
-from copy import deepcopy
 import os
 import sys
-from typing import Any, Dict, Iterable, List
+from typing import Dict, Iterable, List
 
 import pluggy
 from tox.config import Config, _split_env as split_env
@@ -18,14 +17,13 @@ def tox_configure(config):
     verbosity2("original envlist: {}".format(config.envlist))
     verbosity2("original envlist_default: {}".format(config.envlist_default))
 
-    version = '.'.join([str(i) for i in sys.version_info[:2]])
+    version = get_python_version()
     verbosity2("Python version: {}".format(version))
 
     gh_actions_config = parse_config(config._cfg.sections.get("gh-actions", {}))
     verbosity2("tox-gh-actions config: {}".format(gh_actions_config))
 
-    factors = gh_actions_config["python"].get(version, [])
-    envlist = get_envlist_from_factors(config.envlist, factors)
+    envlist = get_envlist(config.envlist, gh_actions_config, version)
     verbosity2("new envlist: {}".format(envlist))
 
     if "GITHUB_ACTION" not in os.environ:
@@ -36,17 +34,26 @@ def tox_configure(config):
 
 
 def parse_config(config):
-    # type: (Dict[str, Any]) -> Dict[str, Dict[str, List[str]]]
+    # type: (Dict[str, str]) -> Dict[str, Dict[str, List[str]]]
     """Parse gh-actions section in tox.ini"""
-    config = deepcopy(config)
-    config["python"] = parse_dict(config.get("python", ""))
-    for k, v in config["python"].items():
-        config["python"][k] = split_env(v)
-    return config
+    config_python = parse_dict(config.get("python", ""))
+    # Example of split_env:
+    # "py{27,38}" => ["py27", "py38"]
+    return {
+        "python": {k: split_env(v) for k, v in config_python.items()}
+    }
+
+
+def get_envlist(envlist, gh_actions_config, version):
+    # type: (Iterable[str], Dict[str, Dict[str, List[str]]], str) -> List[str]
+    """Get envlist using config"""
+    factors = gh_actions_config["python"].get(version, [])
+    return get_envlist_from_factors(envlist, factors)
 
 
 def get_envlist_from_factors(envlist, factors):
     # type: (Iterable[str], Iterable[str]) -> List[str]
+    """Filter envlist using factors"""
     result = []
     for env in envlist:
         for factor in factors:
@@ -55,6 +62,12 @@ def get_envlist_from_factors(envlist, factors):
                 result.append(env)
                 break
     return result
+
+
+def get_python_version():
+    # type: () -> str
+    """Get Python version running in string (e.g,. 3.8)"""
+    return '.'.join([str(i) for i in sys.version_info[:2]])
 
 
 # The following function was copied from
