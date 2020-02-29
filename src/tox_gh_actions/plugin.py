@@ -1,7 +1,6 @@
-from copy import deepcopy
 import os
 import sys
-from typing import Any, Dict, Iterable, List
+from typing import Dict, Iterable, List
 
 import pluggy
 from tox.config import Config, _split_env as split_env
@@ -36,13 +35,14 @@ def tox_configure(config):
 
 
 def parse_config(config):
-    # type: (Dict[str, Any]) -> Dict[str, Dict[str, List[str]]]
+    # type: (Dict[str, str]) -> Dict[str, Dict[str, List[str]]]
     """Parse gh-actions section in tox.ini"""
-    config = deepcopy(config)
-    config["python"] = parse_dict(config.get("python", ""))
-    for k, v in config["python"].items():
-        config["python"][k] = split_env(v)
-    return config
+    config_python = parse_dict(config.get("python", ""))
+    # Example of split_env:
+    # "py{27,38}" => ["py27", "py38"]
+    return {
+        "python": {k: split_env(v) for k, v in config_python.items()}
+    }
 
 
 def get_envlist_from_factors(envlist, factors):
