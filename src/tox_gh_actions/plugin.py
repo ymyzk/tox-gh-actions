@@ -12,6 +12,7 @@ hookimpl = pluggy.HookimplMarker("tox")
 
 @hookimpl
 def tox_configure(config):
+    verbosity2("original envconfigs: {}".format(list(config.envconfigs.keys())))
     verbosity2("original envlist: {}".format(config.envlist))
     verbosity2("original envlist_default: {}".format(config.envlist_default))
 
