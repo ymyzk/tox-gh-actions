@@ -20,7 +20,7 @@ def tox_configure(config):
     version = get_python_version()
     verbosity2("Python version: {}".format(version))
 
-    gh_actions_config = parse_config(config._cfg.sections.get("gh-actions", {}))
+    gh_actions_config = parse_config(config._cfg.sections)
     verbosity2("tox-gh-actions config: {}".format(gh_actions_config))
 
     factors = get_factors(gh_actions_config, version)
@@ -35,9 +35,9 @@ def tox_configure(config):
 
 
 def parse_config(config):
-    # type: (Dict[str, str]) -> Dict[str, Dict[str, List[str]]]
+    # type: (Dict[str, Dict[str, str]]) -> Dict[str, Dict[str, List[str]]]
     """Parse gh-actions section in tox.ini"""
-    config_python = parse_dict(config.get("python", ""))
+    config_python = parse_dict(config.get("gh-actions", {}).get("python", ""))
     # Example of split_env:
     # "py{27,38}" => ["py27", "py38"]
     return {

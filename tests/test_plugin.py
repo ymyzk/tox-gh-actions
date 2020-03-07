@@ -6,10 +6,12 @@ from tox_gh_actions import plugin
 @pytest.mark.parametrize("config,expected", [
     (
         {
-            "python": """2.7: py27
+            "gh-actions": {
+                "python": """2.7: py27
 3.5: py35
 3.6: py36
 3.7: py37, flake8"""
+            }
         },
         {
             "python": {
@@ -19,6 +21,10 @@ from tox_gh_actions import plugin
                 "3.7": ["py37", "flake8"],
             },
         },
+    ),
+    (
+        {"gh-actions": {}},
+        {"python": {}},
     ),
     (
         {},
