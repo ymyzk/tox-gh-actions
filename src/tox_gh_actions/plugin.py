@@ -1,6 +1,6 @@
 import os
 import sys
-from typing import Dict, Iterable, List
+from typing import Any, Dict, Iterable, List
 
 import pluggy
 from tox.config import Config, _split_env as split_env
@@ -35,18 +35,23 @@ def tox_configure(config):
 
 
 def parse_config(config):
-    # type: (Dict[str, Dict[str, str]]) -> Dict[str, Dict[str, List[str]]]
+    # type: (Dict[str, Dict[str, str]]) -> Dict[str, Dict[str, Any]]
     """Parse gh-actions section in tox.ini"""
     config_python = parse_dict(config.get("gh-actions", {}).get("python", ""))
+    config_env = {
+        name: {k: split_env(v) for k, v in parse_dict(conf).items()}
+        for name, conf in config.get("gh-actions:env", {}).items()
+    }
     # Example of split_env:
     # "py{27,38}" => ["py27", "py38"]
     return {
-        "python": {k: split_env(v) for k, v in config_python.items()}
+        "python": {k: split_env(v) for k, v in config_python.items()},
+        "env": config_env,
     }
 
 
 def get_factors(gh_actions_config, version):
-    # type: (Dict[str, Dict[str, List[str]]], str) -> List[str]
+    # type: (Dict[str, Dict[str, Any]], str) -> List[str]
     """Get a list of factors"""
     return gh_actions_config["python"].get(version, [])
 

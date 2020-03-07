@@ -20,15 +20,48 @@ from tox_gh_actions import plugin
                 "3.6": ["py36"],
                 "3.7": ["py37", "flake8"],
             },
+            "env": {},
+        },
+    ),
+    (
+        {
+            "gh-actions": {
+                "python": """2.7: py27
+3.8: py38"""
+            },
+            "gh-actions:env": {
+                "PLATFORM": """ubuntu-latest: linux
+macos-latest: macos
+windows-latest: windows"""
+            }
+        },
+        {
+            "python": {
+                "2.7": ["py27"],
+                "3.8": ["py38"],
+            },
+            "env": {
+                "PLATFORM": {
+                    "ubuntu-latest": ["linux"],
+                    "macos-latest": ["macos"],
+                    "windows-latest": ["windows"],
+                },
+            },
         },
     ),
     (
         {"gh-actions": {}},
-        {"python": {}},
+        {
+            "python": {},
+            "env": {},
+        },
     ),
     (
         {},
-        {"python": {}},
+        {
+            "python": {},
+            "env": {},
+        },
     ),
 ])
 def test_parse_config(config, expected):
