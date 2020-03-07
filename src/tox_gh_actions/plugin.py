@@ -23,7 +23,8 @@ def tox_configure(config):
     gh_actions_config = parse_config(config._cfg.sections.get("gh-actions", {}))
     verbosity2("tox-gh-actions config: {}".format(gh_actions_config))
 
-    envlist = get_envlist(config.envlist, gh_actions_config, version)
+    factors = get_factors(gh_actions_config, version)
+    envlist = get_envlist_from_factors(config.envlist, factors)
     verbosity2("new envlist: {}".format(envlist))
 
     if "GITHUB_ACTION" not in os.environ:
@@ -44,11 +45,10 @@ def parse_config(config):
     }
 
 
-def get_envlist(envlist, gh_actions_config, version):
-    # type: (Iterable[str], Dict[str, Dict[str, List[str]]], str) -> List[str]
-    """Get envlist using config"""
-    factors = gh_actions_config["python"].get(version, [])
-    return get_envlist_from_factors(envlist, factors)
+def get_factors(gh_actions_config, version):
+    # type: (Dict[str, Dict[str, List[str]]], str) -> List[str]
+    """Get a list of factors"""
+    return gh_actions_config["python"].get(version, [])
 
 
 def get_envlist_from_factors(envlist, factors):

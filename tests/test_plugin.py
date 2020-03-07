@@ -29,6 +29,39 @@ def test_parse_config(config, expected):
     assert plugin.parse_config(config) == expected
 
 
+@pytest.mark.parametrize("config,factors,expected", [
+    (
+        {
+            "python": {
+                "2.7": ["py27", "flake8"],
+                "3.8": ["py38", "flake8"],
+            },
+            "unknown": {},
+        },
+        "2.7",
+        ["py27", "flake8"],
+    ),
+    (
+        {
+            "python": {
+                "3.8": ["py38", "flake8"],
+            },
+        },
+        "2.7",
+        [],
+    ),
+    (
+        {
+            "python": {},
+        },
+        "3.8",
+        [],
+    ),
+])
+def test_get_factors(config, factors, expected):
+    assert plugin.get_factors(config, factors) == expected
+
+
 @pytest.mark.parametrize("envlist,factors,expected", [
     (
         ['py27', 'py37', 'flake8'],
