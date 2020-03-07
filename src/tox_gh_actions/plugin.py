@@ -66,7 +66,14 @@ def get_envlist_from_factors(envlist, factors):
 
 def get_python_version():
     # type: () -> str
-    """Get Python version running in string (e.g,. 3.8)"""
+    """Get Python version running in string (e.g,. 3.8)
+
+    - CPython => 2.7, 3.8, ...
+    - PyPy => pypy2, pypy3
+    """
+    if "PyPy" in sys.version:
+        return "pypy" + str(sys.version_info[0])
+    # Assuming running on CPython
     return '.'.join([str(i) for i in sys.version_info[:2]])
 
 

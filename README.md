@@ -122,3 +122,21 @@ python =
 [testenv]
 ...
 ```
+
+PyPy is also supported in the `python` configuration key.
+
+ `tox.ini`:
+```ini
+[tox]
+envlist = py27, py38, pypy2, pypy3
+
+[gh-actions]
+python =
+    2.7: py27
+    3.8: py38, mypy
+    pypy2: pypy2
+    pypy3: pypy3
+
+[testenv]
+...
+```
