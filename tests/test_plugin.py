@@ -138,6 +138,29 @@ def test_parse_config(config, expected):
             },
             "env": {
                 "SAMPLE": {
+                    "VALUE1": ["django18", "flake8"],
+                    "VALUE2": ["django18"],
+                },
+            },
+        },
+        "2.7",
+        {
+            "SAMPLE": "VALUE1",
+            "HOGE": "VALUE3",
+        },
+        [
+            "py27-django18", "py27-flake8",
+            "flake8-django18", "flake8-flake8",
+        ],
+    ),
+    (
+        {
+            "python": {
+                "2.7": ["py27", "flake8"],
+                "3.8": ["py38", "flake8"],
+            },
+            "env": {
+                "SAMPLE": {
                     "VALUE1": ["fact1", "fact2"],
                     "VALUE2": ["fact3", "fact4"],
                 },
@@ -223,6 +246,14 @@ def normalize_factors_list(factors):
         ['py37', 'flake8'],
         ['py37-dj111', 'py37-dj20', 'flake8'],
     ),
+    (
+        ['py27-django18', 'py37-django18', 'flake8'],
+        [
+            'py27-django18', 'py27-flake8',
+            'flake8-django18', 'flake8-flake8',
+        ],
+        ['py27-django18', 'flake8'],
+    )
 ])
 def test_get_envlist_from_factors(envlist, factors, expected):
     assert plugin.get_envlist_from_factors(envlist, factors) == expected
