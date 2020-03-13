@@ -1,3 +1,4 @@
+from itertools import product
 import os
 import sys
 from typing import Any, Dict, Iterable, List
@@ -53,7 +54,15 @@ def parse_config(config):
 def get_factors(gh_actions_config, version):
     # type: (Dict[str, Dict[str, Any]], str) -> List[str]
     """Get a list of factors"""
-    return gh_actions_config["python"].get(version, [])
+    factors = []  # type: List[List[str]]
+    if version in gh_actions_config["python"]:
+        factors.append(gh_actions_config["python"][version])
+    for env, env_config in gh_actions_config.get("env", {}).items():
+        if env in os.environ:
+            env_value = os.environ[env]
+            if env_value in env_config:
+                factors.append(env_config[env_value])
+    return [x for x in map(lambda f: "-".join(f), product(*factors)) if x]
 
 
 def get_envlist_from_factors(envlist, factors):
