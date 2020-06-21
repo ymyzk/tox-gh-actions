@@ -104,7 +104,8 @@ jobs:
       run: tox
 ```
 
-### Advanced Example
+### Advanced Examples
+#### Factor-Conditional Settings: Python Version
 The following configuration will create 2 jobs when running the workflow on GitHub Actions.
 - On Python 2.7 job, tox runs `py27-django111` environment
 - On Python 3.7 job, tox runs `py37-django111` and `py37-django20` environments
@@ -141,6 +142,7 @@ python =
 ...
 ```
 
+#### Factor-Conditional Settings: Environment Variable
 You can also use environment variable to decide which environment to run.
 The following is an example to install different dependency based on platform.
 It will create 12 jobs when running the workflow on GitHub Actions.
