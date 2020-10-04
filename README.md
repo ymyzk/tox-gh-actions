@@ -5,8 +5,8 @@
 [![GitHub Actions (Tests)](https://github.com/ymyzk/tox-gh-actions/workflows/Tests/badge.svg)](https://github.com/ymyzk/tox-gh-actions)
 
 **tox-gh-actions** is a tox plugin which helps running tox on GitHub Actions
-with multiple different Python versions.  This project is inspired by
-[tox-travis](https://github.com/tox-dev/tox-travis).
+with multiple different Python versions on multiple workers in parallel.
+This project is inspired by [tox-travis](https://github.com/tox-dev/tox-travis).
 
 ## Usage
 1. Add configurations under `[gh-actions]` section along with tox's configuration.
