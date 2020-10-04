@@ -28,7 +28,7 @@ def tox_configure(config):
     envlist = get_envlist_from_factors(config.envlist, factors)
     verbosity2("new envlist: {}".format(envlist))
 
-    if "GITHUB_ACTION" not in os.environ:
+    if not is_running_on_actions():
         verbosity1("tox is not running in GitHub Actions")
         verbosity1("tox-gh-actions won't override envlist")
         return
@@ -89,6 +89,14 @@ def get_python_version():
         return "pypy" + str(sys.version_info[0])
     # Assuming running on CPython
     return '.'.join([str(i) for i in sys.version_info[:2]])
+
+
+def is_running_on_actions():
+    # type: () -> bool
+    """Returns True when running on GitHub Actions"""
+    # See the following document on which environ to use for this purpose.
+    # https://docs.github.com/en/free-pro-team@latest/actions/reference/environment-variables#default-environment-variables
+    return os.environ.get("GITHUB_ACTIONS") == "true"
 
 
 # The following function was copied from
