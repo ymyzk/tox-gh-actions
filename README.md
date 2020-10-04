@@ -8,6 +8,11 @@
 with multiple different Python versions on multiple workers in parallel.
 This project is inspired by [tox-travis](https://github.com/tox-dev/tox-travis).
 
+## Features
+When running tox on GitHub Actions, tox-gh-actions
+* detects which environment to run based on configurations and
+* privides utilities such as [grouping log lines](https://github.com/actions/toolkit/blob/main/docs/commands.md#group-and-ungroup-log-lines).
+
 ## Usage
 1. Add configurations under `[gh-actions]` section along with tox's configuration.
    - It will be `pyproject.toml`, `tox.ini`, or `setup.cfg`. See [tox's documentation](https://tox.readthedocs.io/en/latest/config.html) for more details.
