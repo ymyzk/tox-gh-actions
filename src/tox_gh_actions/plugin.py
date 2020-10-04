@@ -14,10 +14,6 @@ hookimpl = pluggy.HookimplMarker("tox")
 @hookimpl
 def tox_configure(config):
     # type: (Config) -> None
-    if 'TOXENV' not in os.environ and not config.option.env:
-        configure_envs(config)
-
-def configure_envs(config):
     verbosity2("original envconfigs: {}".format(list(config.envconfigs.keys())))
     verbosity2("original envlist: {}".format(config.envlist))
     verbosity2("original envlist_default: {}".format(config.envlist_default))
@@ -36,6 +32,11 @@ def configure_envs(config):
         verbosity1("tox is not running in GitHub Actions")
         verbosity1("tox-gh-actions won't override envlist")
         return
+    elif is_env_specified(config):
+        verbosity1("envlist is explicitly given via TOXENV or -e option")
+        verbosity1("tox-gh-actions won't override envlist")
+        return
+
     config.envlist_default = config.envlist = envlist
 
 
@@ -115,6 +116,18 @@ def is_running_on_actions():
     # See the following document on which environ to use for this purpose.
     # https://docs.github.com/en/free-pro-team@latest/actions/reference/environment-variables#default-environment-variables
     return os.environ.get("GITHUB_ACTIONS") == "true"
+
+
+def is_env_specified(config):
+    # type: (Config) -> None
+    """Returns True when environments are explicitly given"""
+    if os.environ.get("TOXENV"):
+        # When TOXENV is a non-empty string
+        return True
+    elif config.option.env is not None:
+        # When command line argument (-e) is given
+        return True
+    return False
 
 
 # The following function was copied from

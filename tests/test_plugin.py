@@ -1,4 +1,5 @@
 import pytest
+from tox.config import Config
 
 from tox_gh_actions import plugin
 
@@ -292,3 +293,18 @@ def test_get_version(mocker, version, info, expected):
 def test_is_running_on_actions(mocker, environ, expected):
     mocker.patch("tox_gh_actions.plugin.os.environ", environ)
     assert plugin.is_running_on_actions() == expected
+
+
+@pytest.mark.parametrize("option_env,environ,expected", [
+    (None, {"TOXENV": "flake8"}, True),
+    (["py27,py38"], {}, True),
+    (["py27", "py38"], {}, True),
+    (["py27"], {"TOXENV": "flake8"}, True),
+    (None, {}, False),
+])
+def test_is_env_specified(mocker, option_env, environ, expected):
+    mocker.patch("tox_gh_actions.plugin.os.environ", environ)
+    option = mocker.MagicMock()
+    option.env = option_env
+    config = Config(None, option, None, mocker.MagicMock(), [])
+    assert plugin.is_env_specified(config) == expected
