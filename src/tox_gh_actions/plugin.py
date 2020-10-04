@@ -32,6 +32,11 @@ def tox_configure(config):
         verbosity1("tox is not running in GitHub Actions")
         verbosity1("tox-gh-actions won't override envlist")
         return
+    elif is_env_specified(config):
+        verbosity1("envlist is explicitly given via TOXENV or -e option")
+        verbosity1("tox-gh-actions won't override envlist")
+        return
+
     config.envlist_default = config.envlist = envlist
 
 
@@ -111,6 +116,18 @@ def is_running_on_actions():
     # See the following document on which environ to use for this purpose.
     # https://docs.github.com/en/free-pro-team@latest/actions/reference/environment-variables#default-environment-variables
     return os.environ.get("GITHUB_ACTIONS") == "true"
+
+
+def is_env_specified(config):
+    # type: (Config) -> None
+    """Returns True when environments are explicitly given"""
+    if os.environ.get("TOXENV"):
+        # When TOXENV is a non-empty string
+        return True
+    elif config.option.env is not None:
+        # When command line argument (-e) is given
+        return True
+    return False
 
 
 # The following function was copied from

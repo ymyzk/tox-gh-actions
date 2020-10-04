@@ -215,3 +215,8 @@ deps =
 
 See [tox's documentation about factor-conditional settings](https://tox.readthedocs.io/en/latest/config.html#factors-and-factor-conditional-settings) as well.
 
+### Overriding Environments to Run
+_Changed in 2.0_: When a list of environments to run is specified explicitly via `-e` option or `TOXENV` environment variable ([tox's help](https://tox.readthedocs.io/en/latest/example/general.html#selecting-one-or-more-environments-to-run-tests-against)),
+tox-gh-actions respects the given environments and simply runs the given environments without enforcing its configuration.
+
+Before 2.0, tox-gh-actions was always enforcing its configuration even when a list of environments is given explicitly.
