@@ -35,6 +35,20 @@ def tox_configure(config):
     config.envlist_default = config.envlist = envlist
 
 
+@hookimpl
+def tox_runtest_pre(venv):
+    # type: (Any) -> None
+    if is_running_on_actions():
+        print("::group::tox: " + venv.name)
+
+
+@hookimpl
+def tox_runtest_post(venv):
+    # type: (Any) -> None
+    if is_running_on_actions():
+        print("::endgroup::")
+
+
 def parse_config(config):
     # type: (Dict[str, Dict[str, str]]) -> Dict[str, Dict[str, Any]]
     """Parse gh-actions section in tox.ini"""
