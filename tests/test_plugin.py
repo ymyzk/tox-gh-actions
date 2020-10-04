@@ -282,3 +282,13 @@ def test_get_version(mocker, version, info, expected):
     mocker.patch("tox_gh_actions.plugin.sys.version", version)
     mocker.patch("tox_gh_actions.plugin.sys.version_info", info)
     assert plugin.get_python_version() == expected
+
+
+@pytest.mark.parametrize("environ,expected", [
+    ({"GITHUB_ACTIONS": "true"}, True),
+    ({"GITHUB_ACTIONS": "false"}, False),
+    ({}, False),
+])
+def test_is_running_on_actions(mocker, environ, expected):
+    mocker.patch("tox_gh_actions.plugin.os.environ", environ)
+    assert plugin.is_running_on_actions() == expected
