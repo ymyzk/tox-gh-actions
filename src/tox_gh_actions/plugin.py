@@ -107,7 +107,7 @@ def get_python_version():
     if "PyPy" in sys.version:
         return "pypy" + str(sys.version_info[0])
     # Assuming running on CPython
-    return '.'.join([str(i) for i in sys.version_info[:2]])
+    return ".".join([str(i) for i in sys.version_info[:2]])
 
 
 def is_running_on_actions():
@@ -135,6 +135,7 @@ def is_env_specified(config):
 # which is licensed under MIT LICENSE
 # https://github.com/tox-dev/tox-travis/blob/0.12/LICENSE
 
+
 def parse_dict(value):
     # type: (str) -> Dict[str, str]
     """Parse a dict value from the tox config.
@@ -151,5 +152,5 @@ def parse_dict(value):
         }
     """
     lines = [line.strip() for line in value.strip().splitlines()]
-    pairs = [line.split(':', 1) for line in lines if line]
+    pairs = [line.split(":", 1) for line in lines if line]
     return dict((k.strip(), v.strip()) for k, v in pairs)
