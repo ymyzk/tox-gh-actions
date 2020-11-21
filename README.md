@@ -223,3 +223,9 @@ _Changed in 2.0_: When a list of environments to run is specified explicitly via
 tox-gh-actions respects the given environments and simply runs the given environments without enforcing its configuration.
 
 Before 2.0, tox-gh-actions was always enforcing its configuration even when a list of environments is given explicitly.
+
+## Investigation
+tox-gh-actions writes log messages using `tox.reporter`.
+This is handy for understanding behavior of tox-gh-actions
+and when debugging tox-gh-actions.
+To see the messages, please run `tox -vv`.
