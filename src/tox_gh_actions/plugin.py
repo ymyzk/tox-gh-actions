@@ -14,9 +14,23 @@ hookimpl = pluggy.HookimplMarker("tox")
 @hookimpl
 def tox_configure(config):
     # type: (Config) -> None
+    verbosity1("running tox-gh-actions")
+    if not is_running_on_actions():
+        verbosity1(
+            "tox-gh-actions won't override envlist "
+            "because tox is not running in GitHub Actions"
+        )
+        return
+    elif is_env_specified(config):
+        verbosity1(
+            "tox-gh-actions won't override envlist because "
+            "envlist is explicitly given via TOXENV or -e option"
+        )
+        return
+
     verbosity2("original envconfigs: {}".format(list(config.envconfigs.keys())))
-    verbosity2("original envlist: {}".format(config.envlist))
     verbosity2("original envlist_default: {}".format(config.envlist_default))
+    verbosity2("original envlist: {}".format(config.envlist))
 
     version = get_python_version()
     verbosity2("Python version: {}".format(version))
@@ -25,19 +39,11 @@ def tox_configure(config):
     verbosity2("tox-gh-actions config: {}".format(gh_actions_config))
 
     factors = get_factors(gh_actions_config, version)
+    verbosity2("using the following factors to decide envlist: {}".format(factors))
+
     envlist = get_envlist_from_factors(config.envlist, factors)
-    verbosity2("new envlist: {}".format(envlist))
-
-    if not is_running_on_actions():
-        verbosity1("tox is not running in GitHub Actions")
-        verbosity1("tox-gh-actions won't override envlist")
-        return
-    elif is_env_specified(config):
-        verbosity1("envlist is explicitly given via TOXENV or -e option")
-        verbosity1("tox-gh-actions won't override envlist")
-        return
-
     config.envlist_default = config.envlist = envlist
+    verbosity1("overriding envlist with: {}".format(envlist))
 
 
 @hookimpl
