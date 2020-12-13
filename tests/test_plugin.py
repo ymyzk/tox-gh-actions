@@ -1,3 +1,5 @@
+from types import SimpleNamespace
+
 import pytest
 from tox.config import Config
 
@@ -222,6 +224,18 @@ def test_parse_config(config, expected):
             {},
             [],
         ),
+        (
+            {
+                "python": {
+                    "3.1": ["py31"],
+                    "3.8": ["py38"],
+                    "3.10-dev": ["py310"],
+                },
+            },
+            "3.10-dev",
+            {},
+            ["py310"],
+        ),
     ],
 )
 def test_get_factors(mocker, config, version, environ, expected):
@@ -278,31 +292,32 @@ def test_get_envlist_from_factors(envlist, factors, expected):
 
 
 @pytest.mark.parametrize(
-    "version,info,expected",
+    "sys_implementation,sys_version_info,expected",
     [
         (
-            "3.8.1 (default, Jan 22 2020, 06:38:00) \n[GCC 9.2.0]",
-            (3, 8, 1, "final", 0),
+            SimpleNamespace(name="cpython"),
+            SimpleNamespace(major=3, minor=8, releaselevel="final"),
             "3.8",
         ),
         (
-            "3.6.9 (1608da62bfc7, Dec 23 2019, 10:50:04)\n"
-            "[PyPy 7.3.0 with GCC 7.3.1 20180303 (Red Hat 7.3.1-5)]",
-            (3, 6, 9, "final", 0),
+            SimpleNamespace(name="cpython"),
+            SimpleNamespace(major=3, minor=10, releaselevel="alpha"),
+            "3.10-dev",
+        ),
+        (
+            SimpleNamespace(name="pypy"),
+            SimpleNamespace(major=3, minor=6, releaselevel="final"),
             "pypy3",
         ),
         (
-            "2.7.13 (724f1a7d62e8, Dec 23 2019, 15:36:24)\n"
-            "[PyPy 7.3.0 with GCC 7.3.1 20180303 (Red Hat 7.3.1-5)]",
-            (2, 7, 13, "final", 42),
+            SimpleNamespace(name="pypy"),
+            SimpleNamespace(major=2, minor=7, releaselevel="final"),
             "pypy2",
         ),
     ],
 )
-def test_get_version(mocker, version, info, expected):
-    mocker.patch("tox_gh_actions.plugin.sys.version", version)
-    mocker.patch("tox_gh_actions.plugin.sys.version_info", info)
-    assert plugin.get_python_version() == expected
+def test_get_version(sys_implementation, sys_version_info, expected):
+    assert plugin.get_python_version(sys_implementation, sys_version_info) == expected
 
 
 @pytest.mark.parametrize(

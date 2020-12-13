@@ -103,17 +103,22 @@ def get_envlist_from_factors(envlist, factors):
     return result
 
 
-def get_python_version():
-    # type: () -> str
-    """Get Python version running in string (e.g,. 3.8)
+def get_python_version(sys_implementation=sys.implementation, sys_version_info=sys.version_info):
+    # type: (Any, Any) -> str
+    """Get a str representing a Python interpreter version which can be matched against keys of `python` dict in
+    `gh-actions` section.
 
     - CPython => 2.7, 3.8, ...
     - PyPy => pypy2, pypy3
     """
-    if "PyPy" in sys.version:
-        return "pypy" + str(sys.version_info[0])
-    # Assuming running on CPython
-    return ".".join([str(i) for i in sys.version_info[:2]])
+    if sys_implementation.name == "pypy":
+        return "pypy" + str(sys_version_info.major)
+    elif sys_implementation.name == "cpython":
+        ver = sys_version_info
+        is_dev = '' if ver.releaselevel == 'final' else '-dev'
+        return "{}.{}{}".format(ver.major, ver.minor, is_dev)
+    else:
+        raise NotImplementedError("unknown Python implementation {}".format(sys_implementation))
 
 
 def is_running_on_actions():
