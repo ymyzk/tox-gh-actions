@@ -108,12 +108,13 @@ def get_python_version():
     """Get Python version running in string (e.g,. 3.8)
 
     - CPython => 2.7, 3.8, ...
-    - PyPy => pypy2, pypy3
+    - PyPy => pypy-2.7, pypy-3.7
     """
-    if "PyPy" in sys.version:
-        return "pypy" + str(sys.version_info[0])
     # Assuming running on CPython
-    return ".".join([str(i) for i in sys.version_info[:2]])
+    version = ".".join([str(i) for i in sys.version_info[:2]])
+    if "PyPy" in sys.version:
+        version = "pypy-" + version
+    return version
 
 
 def is_running_on_actions():

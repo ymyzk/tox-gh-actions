@@ -289,13 +289,13 @@ def test_get_envlist_from_factors(envlist, factors, expected):
             "3.6.9 (1608da62bfc7, Dec 23 2019, 10:50:04)\n"
             "[PyPy 7.3.0 with GCC 7.3.1 20180303 (Red Hat 7.3.1-5)]",
             (3, 6, 9, "final", 0),
-            "pypy3",
+            "pypy-3.6",
         ),
         (
             "2.7.13 (724f1a7d62e8, Dec 23 2019, 15:36:24)\n"
             "[PyPy 7.3.0 with GCC 7.3.1 20180303 (Red Hat 7.3.1-5)]",
             (2, 7, 13, "final", 42),
-            "pypy2",
+            "pypy-2.7",
         ),
     ],
 )
