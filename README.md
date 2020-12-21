@@ -143,8 +143,8 @@ envlist = py27, py38, pypy2, pypy3
 python =
     2.7: py27
     3.8: py38, mypy
-    pypy2: pypy2
-    pypy3: pypy3
+    pypy-2.7: pypy2
+    pypy-3.7: pypy3
 
 [testenv]
 ...
@@ -198,8 +198,8 @@ envlist = py{27,36,37,38}-{linux,macos,windows}
 python =
     2.7: py27
     3.8: py38, mypy
-    pypy2: pypy2
-    pypy3: pypy3
+    pypy-2.7: pypy2
+    pypy-3.7: pypy3
 
 [gh-actions:env]
 PLATFORM =
