@@ -83,9 +83,36 @@ def test_parse_config(config, expected):
                 },
                 "unknown": {},
             },
-            "2.7",
+            ["2.7", "2"],
             {},
             ["py27", "flake8"],
+        ),
+        # Get factors using less precise Python version
+        (
+            {
+                "python": {
+                    "2": ["py2", "flake8"],
+                    "3": ["py3", "flake8"],
+                },
+                "unknown": {},
+            },
+            ["3.8", "3"],
+            {},
+            ["py3", "flake8"],
+        ),
+        # Get factors only from the most precise Python version
+        (
+            {
+                "python": {
+                    "2": ["py2", "flake8"],
+                    "3": ["py3", "flake8"],
+                    "3.9": ["py39"],
+                },
+                "unknown": {},
+            },
+            ["3.9", "3"],
+            {},
+            ["py39"],
         ),
         (
             {
@@ -100,7 +127,7 @@ def test_parse_config(config, expected):
                     },
                 },
             },
-            "2.7",
+            ["2.7", "2"],
             {
                 "SAMPLE": "VALUE1",
                 "HOGE": "VALUE3",
@@ -124,7 +151,7 @@ def test_parse_config(config, expected):
                     },
                 },
             },
-            "2.7",
+            ["2.7", "2"],
             {
                 "SAMPLE": "VALUE1",
                 "HOGE": "VALUE3",
@@ -153,7 +180,7 @@ def test_parse_config(config, expected):
                     },
                 },
             },
-            "2.7",
+            ["2.7", "2"],
             {
                 "SAMPLE": "VALUE1",
                 "HOGE": "VALUE3",
@@ -179,7 +206,7 @@ def test_parse_config(config, expected):
                 },
                 "unknown": {},
             },
-            "2.7",
+            ["2.7", "2"],
             {
                 "SAMPLE": "VALUE3",
             },
@@ -198,7 +225,7 @@ def test_parse_config(config, expected):
                 },
                 "unknown": {},
             },
-            "3.8",
+            ["3.8", "3"],
             {
                 "SAMPLE": "VALUE2",
             },
@@ -210,7 +237,7 @@ def test_parse_config(config, expected):
                     "3.8": ["py38", "flake8"],
                 },
             },
-            "2.7",
+            ["2.7", "2"],
             {},
             [],
         ),
@@ -283,26 +310,26 @@ def test_get_envlist_from_factors(envlist, factors, expected):
         (
             "3.8.1 (default, Jan 22 2020, 06:38:00) \n[GCC 9.2.0]",
             (3, 8, 1, "final", 0),
-            "3.8",
+            ["3.8", "3"],
         ),
         (
             "3.6.9 (1608da62bfc7, Dec 23 2019, 10:50:04)\n"
             "[PyPy 7.3.0 with GCC 7.3.1 20180303 (Red Hat 7.3.1-5)]",
             (3, 6, 9, "final", 0),
-            "pypy-3.6",
+            ["pypy-3.6", "pypy-3", "pypy3"],
         ),
         (
             "2.7.13 (724f1a7d62e8, Dec 23 2019, 15:36:24)\n"
             "[PyPy 7.3.0 with GCC 7.3.1 20180303 (Red Hat 7.3.1-5)]",
             (2, 7, 13, "final", 42),
-            "pypy-2.7",
+            ["pypy-2.7", "pypy-2", "pypy2"],
         ),
     ],
 )
-def test_get_version(mocker, version, info, expected):
+def test_get_version_keys(mocker, version, info, expected):
     mocker.patch("tox_gh_actions.plugin.sys.version", version)
     mocker.patch("tox_gh_actions.plugin.sys.version_info", info)
-    assert plugin.get_python_version() == expected
+    assert plugin.get_python_version_keys() == expected
 
 
 @pytest.mark.parametrize(

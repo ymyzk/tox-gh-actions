@@ -150,6 +150,29 @@ python =
 ...
 ```
 
+You can also specify without minor versions in the `python` configuration key.
+
+`tox.ini`:
+```ini
+[tox]
+envlist = py2, py3, pypy2, pypy3
+
+[gh-actions]
+python =
+    2: py2
+    3: py3, mypy
+    # pypy2 and pypy3 are still supported for backward compatibility
+    pypy-2: pypy2
+    pypy-3: pypy3
+
+[testenv]
+...
+```
+
+If there are multiple matching Python versions in the configuration, only the most precise one is used.
+For example, if you are running CPython 3.8 and `gh-actions.python` has both `3` and `3.8`,
+tox-gh-actions gets factors only from the key `3.8`.
+
 #### Factor-Conditional Settings: Environment Variable
 You can also use environment variable to decide which environment to run.
 The following is an example to install different dependency based on platform.
