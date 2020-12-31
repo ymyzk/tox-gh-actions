@@ -32,13 +32,13 @@ def tox_configure(config):
     verbosity2("original envlist_default: {}".format(config.envlist_default))
     verbosity2("original envlist: {}".format(config.envlist))
 
-    version = get_python_version()
-    verbosity2("Python version: {}".format(version))
+    versions = get_python_version_keys()
+    verbosity2("Python versions: {}".format(versions))
 
     gh_actions_config = parse_config(config._cfg.sections)
     verbosity2("tox-gh-actions config: {}".format(gh_actions_config))
 
-    factors = get_factors(gh_actions_config, version)
+    factors = get_factors(gh_actions_config, versions)
     verbosity2("using the following factors to decide envlist: {}".format(factors))
 
     envlist = get_envlist_from_factors(config.envlist, factors)
@@ -76,12 +76,15 @@ def parse_config(config):
     }
 
 
-def get_factors(gh_actions_config, version):
-    # type: (Dict[str, Dict[str, Any]], str) -> List[str]
+def get_factors(gh_actions_config, versions):
+    # type: (Dict[str, Dict[str, Any]], Iterable[str]) -> List[str]
     """Get a list of factors"""
     factors = []  # type: List[List[str]]
-    if version in gh_actions_config["python"]:
-        factors.append(gh_actions_config["python"][version])
+    for version in versions:
+        if version in gh_actions_config["python"]:
+            verbosity2("got factors for Python version: {}".format(version))
+            factors.append(gh_actions_config["python"][version])
+            break  # Shoudn't check remaining versions
     for env, env_config in gh_actions_config.get("env", {}).items():
         if env in os.environ:
             env_value = os.environ[env]
@@ -103,18 +106,30 @@ def get_envlist_from_factors(envlist, factors):
     return result
 
 
-def get_python_version():
-    # type: () -> str
-    """Get Python version running in string (e.g,. 3.8)
+def get_python_version_keys():
+    # type: () -> List[str]
+    """Get Python version in string for getting factors from gh-action's config
 
-    - CPython => 2.7, 3.8, ...
-    - PyPy => pypy-2.7, pypy-3.7
+    Examples:
+    - CPython 2.7.z => [2.7, 2]
+    - CPython 3.8.z => [3.8, 3]
+    - PyPy 2.7 (v7.3.z) => [pypy-2.7, pypy-2, pypy2]
+    - PyPy 3.6 (v7.3.z) => [pypy-3.6, pypy-3, pypy3]
+
+    Support of "pypy2" and "pypy3" is for backward compatibility with
+    tox-gh-actions v2.2.0 and before.
     """
-    # Assuming running on CPython
-    version = ".".join([str(i) for i in sys.version_info[:2]])
+    major_version = str(sys.version_info[0])
+    major_minor_version = ".".join([str(i) for i in sys.version_info[:2]])
     if "PyPy" in sys.version:
-        version = "pypy-" + version
-    return version
+        return [
+            "pypy-" + major_minor_version,
+            "pypy-" + major_version,
+            "pypy" + major_version,
+        ]
+    else:
+        # Assume this is running on CPython
+        return [major_minor_version, major_version]
 
 
 def is_running_on_actions():
