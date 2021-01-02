@@ -38,3 +38,6 @@ jobs:
         name: tox-gh-actions-coverage
         path: coverage.xml
         if-no-files-found: error
+    - name: Upload coverage.xml to codecov
+      if: ${{ matrix.platform == 'ubuntu-latest' && matrix.python-version == '3.9' }}
+      uses: codecov/codecov-action@v1
