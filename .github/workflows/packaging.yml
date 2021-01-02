@@ -26,10 +26,12 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip setuptools setuptools_scm wheel
+        python -m pip install --upgrade pip setuptools setuptools_scm twine wheel
     - name: Create packages
       run: python setup.py sdist bdist_wheel
-    - uses: actions/upload-artifact@master
+    - name: Run twine check
+      run: twine check dist/*
+    - uses: actions/upload-artifact@v2
       with:
         name: tox-gh-actions-dist
         path: dist
