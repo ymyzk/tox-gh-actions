@@ -5,6 +5,7 @@
 *.pyc
 *.dist-info
 .coverage
+coverage.xml
 *.egg-info
 /.tox
 /dist
