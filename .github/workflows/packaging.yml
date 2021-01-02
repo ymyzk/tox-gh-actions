@@ -3,6 +3,8 @@ name: Packaging
 on:
   # Make sure packaging process is not broken
   push:
+    branches: [master]
+  pull_request:
   # Make a package for release
   release:
     types: [published]
