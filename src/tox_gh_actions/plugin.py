@@ -4,8 +4,9 @@ import sys
 from typing import Any, Dict, Iterable, List
 
 import pluggy
-from tox.config import Config, _split_env as split_env
+from tox.config import Config, TestenvConfig, _split_env as split_env
 from tox.reporter import verbosity1, verbosity2
+from tox.venv import VirtualEnv
 
 
 hookimpl = pluggy.HookimplMarker("tox")
@@ -48,14 +49,18 @@ def tox_configure(config):
 
 @hookimpl
 def tox_runtest_pre(venv):
-    # type: (Any) -> None
+    # type: (VirtualEnv) -> None
     if is_running_on_actions():
-        print("::group::tox: " + venv.name)
+        envconfig = venv.envconfig  # type: TestenvConfig
+        message = envconfig.envname
+        if envconfig.description:
+            message += " - " + envconfig.description
+        print("::group::tox: " + message)
 
 
 @hookimpl
 def tox_runtest_post(venv):
-    # type: (Any) -> None
+    # type: (VirtualEnv) -> None
     if is_running_on_actions():
         print("::endgroup::")
 
