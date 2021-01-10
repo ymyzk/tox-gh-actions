@@ -12,4 +12,5 @@ coverage.xml
 /.*_cache
 /pip-wheel-metadata
 /src/tox_gh_actions/version.py
+/tests/integration/out/
 /build
