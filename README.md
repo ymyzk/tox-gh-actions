@@ -95,7 +95,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
-      max-parallel: 5
       matrix:
         python-version: [2.7, 3.6, 3.7, 3.8, 3.9]
 
@@ -192,7 +191,6 @@ jobs:
   build:
     runs-on: ${{ matrix.platform }}
     strategy:
-      max-parallel: 4
       matrix:
         platform: [ubuntu-latest, macos-latest, windows-latest]
         python-version: [2.7, 3.6, 3.7, 3.8]
