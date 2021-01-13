@@ -89,7 +89,9 @@ python =
 ```yaml
 name: Python package
 
-on: [push]
+on:
+  - push
+  - pull_request
 
 jobs:
   build:
@@ -185,7 +187,9 @@ It will create 12 jobs when running the workflow on GitHub Actions.
 ```yaml
 name: Python package
 
-on: [push]
+on:
+  - push
+  - pull_request
 
 jobs:
   build:
