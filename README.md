@@ -250,8 +250,15 @@ tox-gh-actions respects the given environments and simply runs the given environ
 
 Before 2.0, tox-gh-actions was always enforcing its configuration even when a list of environments is given explicitly.
 
-## Investigation
+## Understanding Behavior of tox-gh-actions
+### How tox-gh-actions Works
+
+1. If tox is not running on GitHub Actions or a list of environments is explicitly explicitly given, tox-gh-actions won't do anything special.
+2. Get a list of environments from `envlist` in the configuration file.
+3. Pick environments to run in the current build based on the configuration in the `[gh-actions]` section.
+4. Override `envlist` with the selected environments and tox will run them.
+
+### Logging
 tox-gh-actions writes log messages using `tox.reporter`.
-This is handy for understanding behavior of tox-gh-actions
-and when debugging tox-gh-actions.
-To see the messages, please run `tox -vv`.
+This is handy for understanding behavior of tox-gh-actions and for debugging tox-gh-actions.
+To see the log messages, please run `tox -vv`.
