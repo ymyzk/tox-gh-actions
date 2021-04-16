@@ -89,7 +89,7 @@ def get_factors(gh_actions_config, versions):
         if version in gh_actions_config["python"]:
             verbosity2("got factors for Python version: {}".format(version))
             factors.append(gh_actions_config["python"][version])
-            break  # Shoudn't check remaining versions
+            break  # Shouldn't check remaining versions
     for env, env_config in gh_actions_config.get("env", {}).items():
         if env in os.environ:
             env_value = os.environ[env]

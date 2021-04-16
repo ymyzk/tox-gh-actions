@@ -11,7 +11,7 @@ This project is inspired by [tox-travis](https://github.com/tox-dev/tox-travis).
 ## Features
 When running tox on GitHub Actions, tox-gh-actions
 * detects which environment to run based on configurations and
-* privides utilities such as [grouping log lines](https://github.com/actions/toolkit/blob/main/docs/commands.md#group-and-ungroup-log-lines).
+* provides utilities such as [grouping log lines](https://github.com/actions/toolkit/blob/main/docs/commands.md#group-and-ungroup-log-lines).
 
 ## Usage
 1. Add configurations under `[gh-actions]` section along with tox's configuration.
@@ -29,7 +29,7 @@ The following configuration will create 5 jobs when running the workflow on GitH
 - On Python 3.9 job, tox runs `py39` environment
 
 #### tox-gh-actions Configuration
-Add `[gh-actions]` section to the same file as tox's cofiguration.
+Add `[gh-actions]` section to the same file as tox's configuration.
 
 If you're using `tox.ini`:
 ```ini
