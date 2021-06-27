@@ -134,6 +134,36 @@ python =
 ...
 ```
 
+When using pre-release versions of Python, please do not specify `-beta` or `-dev` in `tox.ini`.
+
+`.github/workflows/<workflow>.yml`:
+```yaml
+...
+jobs:
+  build:
+    strategy:
+      matrix:
+        python-version: [3.9, 3.10.0-beta.3]
+...
+```
+
+`tox.ini`:
+```ini
+[tox]
+envlist = py39, py310
+
+[gh-actions]
+python =
+    3.9: py39
+    3.10: py310
+    # The followings won't work
+    # 3.10-beta.3: py310
+    # 3.10-dev: py310
+
+[testenv]
+...
+```
+
 PyPy is also supported in the `python` configuration key.
 
  `tox.ini`:
