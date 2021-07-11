@@ -332,6 +332,24 @@ def test_get_version_keys(mocker, version, info, expected):
     assert plugin.get_python_version_keys() == expected
 
 
+def test_get_version_keys_on_pyston(mocker):
+    mocker.patch(
+        "tox_gh_actions.plugin.sys.pyston_version_info",
+        (2, 2, 0, "final", 0),
+        create=True,  # For non-Pyston implementation
+    )
+    mocker.patch(
+        "tox_gh_actions.plugin.sys.version",
+        "3.8.8 (heads/rel2.2:6287d61, Apr 29 2021, 15:46:12)\n"
+        "[Pyston 2.2.0, GCC 9.3.0]",
+    )
+    mocker.patch(
+        "tox_gh_actions.plugin.sys.version_info",
+        (3, 8, 8, "final", 0),
+    )
+    assert plugin.get_python_version_keys() == ["pyston-3.8", "pyston-3"]
+
+
 @pytest.mark.parametrize(
     "environ,expected",
     [

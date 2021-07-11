@@ -165,11 +165,12 @@ python =
 ```
 
 PyPy is also supported in the `python` configuration key.
+Support of Pyston is experimental and not tested by our CI.
 
  `tox.ini`:
 ```ini
 [tox]
-envlist = py27, py38, pypy2, pypy3
+envlist = py27, py38, pypy2, pypy3, pyston38
 
 [gh-actions]
 python =
@@ -177,9 +178,13 @@ python =
     3.8: py38, mypy
     pypy-2.7: pypy2
     pypy-3.7: pypy3
+    pyston-3.8: python38
 
 [testenv]
 ...
+
+[testenv:pyston38]
+basepython = pyston38
 ```
 
 You can also specify without minor versions in the `python` configuration key.
