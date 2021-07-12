@@ -1,6 +1,8 @@
 [build-system]
 requires = [
-    "setuptools >= 40.0.4",
+    # For PEP 517 and PEP 518 support
+    # https://pip.pypa.io/en/stable/cli/pip/#pep-517-and-518-support
+    "setuptools >= 40.8.0",
     "setuptools_scm >= 3, <4",
     "wheel >= 0.29.0",
 ]
