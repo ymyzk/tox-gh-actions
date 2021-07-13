@@ -1,8 +1,12 @@
 [build-system]
 requires = [
-    "setuptools >= 40.0.4",
-    "setuptools_scm >= 3, <4",
-    "wheel >= 0.29.0",
+    # For PEP 517 and PEP 518 support
+    # https://pip.pypa.io/en/stable/cli/pip/#pep-517-and-518-support
+    # setuptools_scm v6 requires setuptools >= 45
+    "setuptools >= 40.8.0",
+    # Needs setuptools_scm v5 for Python <3.6
+    "setuptools_scm[toml] >= 5, <7",
+    "wheel",
 ]
 build-backend = 'setuptools.build_meta'
 
@@ -16,3 +20,6 @@ source = [
    "src",
    "*/site-packages",
 ]
+
+[tool.setuptools_scm]
+write_to = "src/tox_gh_actions/version.py"
