@@ -215,7 +215,7 @@ You can also use environment variable to decide which environment to run.
 The following is an example to install different dependency based on platform.
 It will create 12 jobs when running the workflow on GitHub Actions.
 - On Python 2.7/ubuntu-latest job, tox runs `py27-linux` environment
-- On Python 3.5/ubuntu-latest job, tox runs `py35-linux` environment
+- On Python 3.6/ubuntu-latest job, tox runs `py36-linux` environment
 - and so on.
 
 `.github/workflows/<workflow>.yml`:
@@ -258,9 +258,9 @@ envlist = py{27,36,37,38}-{linux,macos,windows}
 [gh-actions]
 python =
     2.7: py27
-    3.8: py38, mypy
-    pypy-2.7: pypy2
-    pypy-3.7: pypy3
+    3.6: py36
+    3.7: py37
+    3.8: py38
 
 [gh-actions:env]
 PLATFORM =
