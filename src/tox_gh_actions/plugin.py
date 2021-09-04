@@ -152,7 +152,7 @@ def is_running_on_actions():
 
 
 def is_env_specified(config):
-    # type: (Config) -> None
+    # type: (Config) -> bool
     """Returns True when environments are explicitly given"""
     if os.environ.get("TOXENV"):
         # When TOXENV is a non-empty string
