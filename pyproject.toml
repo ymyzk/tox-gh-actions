@@ -3,16 +3,15 @@ requires = [
     # For PEP 517 and PEP 518 support
     # https://pip.pypa.io/en/stable/cli/pip/#pep-517-and-518-support
     # setuptools_scm v6 requires setuptools >= 45
-    "setuptools >= 40.8.0",
-    # Needs setuptools_scm v5 for Python <3.6
-    "setuptools_scm[toml] >= 5, <7",
+    "setuptools >= 45",
+    "setuptools_scm[toml] >= 6, <7",
     "wheel",
 ]
 build-backend = 'setuptools.build_meta'
 
 [tool.black]
 # py39 is not supported yet
-target-version = ["py27", "py35", "py36", "py37", "py38"]
+target-version = ["py36", "py37", "py38"]
 
 [tool.coverage.paths]
 # For combining source file paths correctly

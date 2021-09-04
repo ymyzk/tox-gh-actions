@@ -26,7 +26,7 @@ def test_integration():
     expected_envs_map = defaultdict(
         list,
         [
-            ((2, 7), ["py27"]),
+            ((3, 8), ["py38"]),
             ((3, 9), ["py39"]),
         ],
     )

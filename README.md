@@ -21,8 +21,7 @@ When running tox on GitHub Actions, tox-gh-actions
 
 ## Examples
 ### Basic Example
-The following configuration will create 5 jobs when running the workflow on GitHub Actions.
-- On Python 2.7 job, tox runs `py27` environment
+The following configuration will create 4 jobs when running the workflow on GitHub Actions.
 - On Python 3.6 job, tox runs `py36` environment
 - On Python 3.7 job, tox runs `py37` environment
 - On Python 3.8 job, tox runs `py38` and `mypy` environments
@@ -34,11 +33,10 @@ Add `[gh-actions]` section to the same file as tox's configuration.
 If you're using `tox.ini`:
 ```ini
 [tox]
-envlist = py27, py36, py37, py38, py39, mypy
+envlist = py36, py37, py38, py39, mypy
 
 [gh-actions]
 python =
-    2.7: py27
     3.6: py36
     3.7: py37
     3.8: py38, mypy
@@ -51,11 +49,10 @@ python =
 If you're using `setup.cfg`:
 ```ini
 [tox:tox]
-envlist = py27, py36, py37, py38, py39, mypy
+envlist = py36, py37, py38, py39, mypy
 
 [gh-actions]
 python =
-    2.7: py27
     3.6: py36
     3.7: py37
     3.8: py38, mypy
@@ -70,11 +67,10 @@ If you're using `pyproject.toml`:
 [tool.tox]
 legacy_tox_ini = """
 [tox]
-envlist = py27, py36, py37, py38, py39, mypy
+envlist = py36, py37, py38, py39, mypy
 
 [gh-actions]
 python =
-    2.7: py27
     3.6: py36
     3.7: py37
     3.8: py38, mypy
@@ -98,7 +94,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [2.7, 3.6, 3.7, 3.8, 3.9]
+        python-version: [3.6, 3.7, 3.8, 3.9]
 
     steps:
     - uses: actions/checkout@v1
@@ -117,18 +113,18 @@ jobs:
 ### Advanced Examples
 #### Factor-Conditional Settings: Python Version
 The following configuration will create 2 jobs when running the workflow on GitHub Actions.
-- On Python 2.7 job, tox runs `py27-django111` environment
-- On Python 3.7 job, tox runs `py37-django111` and `py37-django20` environments
+- On Python 3.7 job, tox runs `py37-django22` and `py37-django32` environments
+- On Python 3.8 job, tox runs `py38-django32` environment
 
 `tox.ini`:
 ```ini
 [tox]
-envlist = py27-django{111}, py37-django{111,20}
+envlist = py37-django{22,32}, py38-django32
 
 [gh-actions]
 python =
-    2.7: py27
     3.7: py37
+    3.8: py38
 
 [testenv]
 ...
@@ -170,15 +166,14 @@ Support of Pyston is experimental and not tested by our CI.
  `tox.ini`:
 ```ini
 [tox]
-envlist = py27, py38, pypy2, pypy3, pyston38
+envlist = py37, py38, pypy3, pyston38
 
 [gh-actions]
 python =
-    2.7: py27
+    3.7: py37
     3.8: py38, mypy
-    pypy-2.7: pypy2
     pypy-3.7: pypy3
-    pyston-3.8: python38
+    pyston-3.8: pyston38
 
 [testenv]
 ...
@@ -192,14 +187,12 @@ You can also specify without minor versions in the `python` configuration key.
 `tox.ini`:
 ```ini
 [tox]
-envlist = py2, py3, pypy2, pypy3
+envlist = py3, pypy3
 
 [gh-actions]
 python =
-    2: py2
     3: py3, mypy
-    # pypy2 and pypy3 are still supported for backward compatibility
-    pypy-2: pypy2
+    # pypy3 are still supported for backward compatibility
     pypy-3: pypy3
 
 [testenv]
@@ -213,9 +206,9 @@ tox-gh-actions gets factors only from the key `3.8`.
 #### Factor-Conditional Settings: Environment Variable
 You can also use environment variable to decide which environment to run.
 The following is an example to install different dependency based on platform.
-It will create 12 jobs when running the workflow on GitHub Actions.
-- On Python 2.7/ubuntu-latest job, tox runs `py27-linux` environment
-- On Python 3.5/ubuntu-latest job, tox runs `py35-linux` environment
+It will create 9 jobs when running the workflow on GitHub Actions.
+- On Python 3.6/ubuntu-latest job, tox runs `py36-linux` environment
+- On Python 3.7/ubuntu-latest job, tox runs `py37-linux` environment
 - and so on.
 
 `.github/workflows/<workflow>.yml`:
@@ -232,7 +225,7 @@ jobs:
     strategy:
       matrix:
         platform: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: [2.7, 3.6, 3.7, 3.8]
+        python-version: [3.6, 3.7, 3.8]
 
     steps:
     - uses: actions/checkout@v1
@@ -253,14 +246,13 @@ jobs:
 `tox.ini`:
 ```ini
 [tox]
-envlist = py{27,36,37,38}-{linux,macos,windows}
+envlist = py{36,37,38}-{linux,macos,windows}
 
 [gh-actions]
 python =
-    2.7: py27
-    3.8: py38, mypy
-    pypy-2.7: pypy2
-    pypy-3.7: pypy3
+    3.6: py36
+    3.7: py37
+    3.8: py38
 
 [gh-actions:env]
 PLATFORM =
