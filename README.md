@@ -192,7 +192,6 @@ envlist = py3, pypy3
 [gh-actions]
 python =
     3: py3, mypy
-    # pypy3 are still supported for backward compatibility
     pypy-3: pypy3
 
 [testenv]
@@ -202,6 +201,8 @@ python =
 If there are multiple matching Python versions in the configuration, only the most precise one is used.
 For example, if you are running CPython 3.8 and `gh-actions.python` has both `3` and `3.8`,
 tox-gh-actions gets factors only from the key `3.8`.
+
+_Changed in 3.0_: `pypy3` is not supported in the configuration anymore. Please use `pypy-3` instead.
 
 #### Factor-Conditional Settings: Environment Variable
 You can also use environment variable to decide which environment to run.

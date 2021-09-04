@@ -119,9 +119,6 @@ def get_python_version_keys():
     - CPython 3.8.z => [3.8, 3]
     - PyPy 3.6 (v7.3.z) => [pypy-3.6, pypy-3, pypy3]
     - Pyston based on Python CPython 3.8.8 (v2.2) => [pyston-3.8, pyston-3]
-
-    Support of "pypy2" and "pypy3" is for backward compatibility with
-    tox-gh-actions v2.2.0 and before.
     """
     major_version = str(sys.version_info[0])
     major_minor_version = ".".join([str(i) for i in sys.version_info[:2]])
@@ -129,7 +126,6 @@ def get_python_version_keys():
         return [
             "pypy-" + major_minor_version,
             "pypy-" + major_version,
-            "pypy" + major_version,
         ]
     elif hasattr(sys, "pyston_version_info"):  # Pyston
         return [
