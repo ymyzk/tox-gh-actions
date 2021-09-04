@@ -10,8 +10,7 @@ requires = [
 build-backend = 'setuptools.build_meta'
 
 [tool.black]
-# py39 is not supported yet
-target-version = ["py36", "py37", "py38"]
+target-version = ["py36", "py37", "py38", "py39"]
 
 [tool.coverage.paths]
 # For combining source file paths correctly
