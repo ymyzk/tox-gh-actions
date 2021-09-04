@@ -13,8 +13,7 @@ hookimpl = pluggy.HookimplMarker("tox")
 
 
 @hookimpl
-def tox_configure(config):
-    # type: (Config) -> None
+def tox_configure(config: Config) -> None:
     verbosity1("running tox-gh-actions")
     if not is_running_on_actions():
         verbosity1(
@@ -48,10 +47,9 @@ def tox_configure(config):
 
 
 @hookimpl
-def tox_runtest_pre(venv):
-    # type: (VirtualEnv) -> None
+def tox_runtest_pre(venv: VirtualEnv) -> None:
     if is_running_on_actions():
-        envconfig = venv.envconfig  # type: TestenvConfig
+        envconfig: TestenvConfig = venv.envconfig
         message = envconfig.envname
         if envconfig.description:
             message += " - " + envconfig.description
@@ -59,14 +57,12 @@ def tox_runtest_pre(venv):
 
 
 @hookimpl
-def tox_runtest_post(venv):
-    # type: (VirtualEnv) -> None
+def tox_runtest_post(venv: VirtualEnv) -> None:
     if is_running_on_actions():
         print("::endgroup::")
 
 
-def parse_config(config):
-    # type: (Dict[str, Dict[str, str]]) -> Dict[str, Dict[str, Any]]
+def parse_config(config: Dict[str, Dict[str, str]]) -> Dict[str, Dict[str, Any]]:
     """Parse gh-actions section in tox.ini"""
     config_python = parse_dict(config.get("gh-actions", {}).get("python", ""))
     config_env = {
@@ -81,10 +77,11 @@ def parse_config(config):
     }
 
 
-def get_factors(gh_actions_config, versions):
-    # type: (Dict[str, Dict[str, Any]], Iterable[str]) -> List[str]
+def get_factors(
+    gh_actions_config: Dict[str, Dict[str, Any]], versions: Iterable[str]
+) -> List[str]:
     """Get a list of factors"""
-    factors = []  # type: List[List[str]]
+    factors: List[List[str]] = []
     for version in versions:
         if version in gh_actions_config["python"]:
             verbosity2("got factors for Python version: {}".format(version))
@@ -98,8 +95,9 @@ def get_factors(gh_actions_config, versions):
     return [x for x in map(lambda f: "-".join(f), product(*factors)) if x]
 
 
-def get_envlist_from_factors(envlist, factors):
-    # type: (Iterable[str], Iterable[str]) -> List[str]
+def get_envlist_from_factors(
+    envlist: Iterable[str], factors: Iterable[str]
+) -> List[str]:
     """Filter envlist using factors"""
     result = []
     for env in envlist:
@@ -111,8 +109,7 @@ def get_envlist_from_factors(envlist, factors):
     return result
 
 
-def get_python_version_keys():
-    # type: () -> List[str]
+def get_python_version_keys() -> List[str]:
     """Get Python version in string for getting factors from gh-action's config
 
     Examples:
@@ -137,16 +134,14 @@ def get_python_version_keys():
         return [major_minor_version, major_version]
 
 
-def is_running_on_actions():
-    # type: () -> bool
+def is_running_on_actions() -> bool:
     """Returns True when running on GitHub Actions"""
     # See the following document on which environ to use for this purpose.
     # https://docs.github.com/en/free-pro-team@latest/actions/reference/environment-variables#default-environment-variables
     return os.environ.get("GITHUB_ACTIONS") == "true"
 
 
-def is_env_specified(config):
-    # type: (Config) -> bool
+def is_env_specified(config: Config) -> bool:
     """Returns True when environments are explicitly given"""
     if os.environ.get("TOXENV"):
         # When TOXENV is a non-empty string
@@ -163,8 +158,7 @@ def is_env_specified(config):
 # https://github.com/tox-dev/tox-travis/blob/0.12/LICENSE
 
 
-def parse_dict(value):
-    # type: (str) -> Dict[str, str]
+def parse_dict(value: str) -> Dict[str, str]:
     """Parse a dict value from the tox config.
     .. code-block: ini
         [travis]
