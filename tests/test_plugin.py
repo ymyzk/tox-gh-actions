@@ -10,18 +10,16 @@ from tox_gh_actions import plugin
         (
             {
                 "gh-actions": {
-                    "python": """2.7: py27
-3.5: py35
-3.6: py36
-3.7: py37, flake8"""
+                    "python": """3.7: py37
+3.8: py38
+3.9: py39, flake8"""
                 }
             },
             {
                 "python": {
-                    "2.7": ["py27"],
-                    "3.5": ["py35"],
-                    "3.6": ["py36"],
-                    "3.7": ["py37", "flake8"],
+                    "3.7": ["py37"],
+                    "3.8": ["py38"],
+                    "3.9": ["py39", "flake8"],
                 },
                 "env": {},
             },
@@ -29,7 +27,7 @@ from tox_gh_actions import plugin
         (
             {
                 "gh-actions": {
-                    "python": """2.7: py27
+                    "python": """3.7: py37
 3.8: py38"""
                 },
                 "gh-actions:env": {
@@ -40,7 +38,7 @@ windows-latest: windows"""
             },
             {
                 "python": {
-                    "2.7": ["py27"],
+                    "3.7": ["py37"],
                     "3.8": ["py38"],
                 },
                 "env": {
@@ -78,14 +76,14 @@ def test_parse_config(config, expected):
         (
             {
                 "python": {
-                    "2.7": ["py27", "flake8"],
+                    "3.7": ["py37", "flake8"],
                     "3.8": ["py38", "flake8"],
                 },
                 "unknown": {},
             },
-            ["2.7", "2"],
+            ["3.7", "3"],
             {},
-            ["py27", "flake8"],
+            ["py37", "flake8"],
         ),
         # Get factors using less precise Python version
         (
@@ -117,7 +115,7 @@ def test_parse_config(config, expected):
         (
             {
                 "python": {
-                    "2.7": ["py27", "flake8"],
+                    "3.7": ["py37", "flake8"],
                     "3.8": ["py38", "flake8"],
                 },
                 "env": {
@@ -127,17 +125,17 @@ def test_parse_config(config, expected):
                     },
                 },
             },
-            ["2.7", "2"],
+            ["3.7", "3"],
             {
                 "SAMPLE": "VALUE1",
                 "HOGE": "VALUE3",
             },
-            ["py27-fact1", "py27-fact2", "flake8-fact1", "flake8-fact2"],
+            ["py37-fact1", "py37-fact2", "flake8-fact1", "flake8-fact2"],
         ),
         (
             {
                 "python": {
-                    "2.7": ["py27", "flake8"],
+                    "3.7": ["py37", "flake8"],
                     "3.8": ["py38", "flake8"],
                 },
                 "env": {
@@ -151,16 +149,16 @@ def test_parse_config(config, expected):
                     },
                 },
             },
-            ["2.7", "2"],
+            ["3.7", "3"],
             {
                 "SAMPLE": "VALUE1",
                 "HOGE": "VALUE3",
             },
             [
-                "py27-fact1-fact5",
-                "py27-fact1-fact6",
-                "py27-fact2-fact5",
-                "py27-fact2-fact6",
+                "py37-fact1-fact5",
+                "py37-fact1-fact6",
+                "py37-fact2-fact5",
+                "py37-fact2-fact6",
                 "flake8-fact1-fact5",
                 "flake8-fact1-fact6",
                 "flake8-fact2-fact5",
@@ -170,7 +168,7 @@ def test_parse_config(config, expected):
         (
             {
                 "python": {
-                    "2.7": ["py27", "flake8"],
+                    "3.7": ["py37", "flake8"],
                     "3.8": ["py38", "flake8"],
                 },
                 "env": {
@@ -180,14 +178,14 @@ def test_parse_config(config, expected):
                     },
                 },
             },
-            ["2.7", "2"],
+            ["3.7", "3"],
             {
                 "SAMPLE": "VALUE1",
                 "HOGE": "VALUE3",
             },
             [
-                "py27-django18",
-                "py27-flake8",
+                "py37-django18",
+                "py37-flake8",
                 "flake8-django18",
                 "flake8-flake8",
             ],
@@ -195,7 +193,7 @@ def test_parse_config(config, expected):
         (
             {
                 "python": {
-                    "2.7": ["py27", "flake8"],
+                    "3.7": ["py37", "flake8"],
                     "3.8": ["py38", "flake8"],
                 },
                 "env": {
@@ -206,16 +204,16 @@ def test_parse_config(config, expected):
                 },
                 "unknown": {},
             },
-            ["2.7", "2"],
+            ["3.7", "3"],
             {
                 "SAMPLE": "VALUE3",
             },
-            ["py27", "flake8"],
+            ["py37", "flake8"],
         ),
         (
             {
                 "python": {
-                    "2.7": ["py27", "flake8"],
+                    "3.7": ["py37", "flake8"],
                     "3.8": ["py38", "flake8"],
                 },
                 "env": {
@@ -237,7 +235,7 @@ def test_parse_config(config, expected):
                     "3.8": ["py38", "flake8"],
                 },
             },
-            ["2.7", "2"],
+            ["3.7", "3"],
             {},
             [],
         ),
@@ -269,12 +267,12 @@ def normalize_factors_list(factors):
     "envlist,factors,expected",
     [
         (
-            ["py27", "py37", "flake8"],
-            ["py37", "flake8"],
-            ["py37", "flake8"],
+            ["py37", "py38", "flake8"],
+            ["py38", "flake8"],
+            ["py38", "flake8"],
         ),
         (
-            ["py27", "py37", "flake8"],
+            ["py37", "py38", "flake8"],
             [],
             [],
         ),
@@ -284,19 +282,19 @@ def normalize_factors_list(factors):
             [],
         ),
         (
-            ["py27-dj111", "py37-dj111", "py37-dj20", "flake8"],
-            ["py37", "flake8"],
-            ["py37-dj111", "py37-dj20", "flake8"],
+            ["py37-dj111", "py38-dj111", "py38-dj20", "flake8"],
+            ["py38", "flake8"],
+            ["py38-dj111", "py38-dj20", "flake8"],
         ),
         (
-            ["py27-django18", "py37-django18", "flake8"],
+            ["py37-django18", "py38-django18", "flake8"],
             [
-                "py27-django18",
-                "py27-flake8",
+                "py37-django18",
+                "py37-flake8",
                 "flake8-django18",
                 "flake8-flake8",
             ],
-            ["py27-django18", "flake8"],
+            ["py37-django18", "flake8"],
         ),
     ],
 )
@@ -317,12 +315,6 @@ def test_get_envlist_from_factors(envlist, factors, expected):
             "[PyPy 7.3.0 with GCC 7.3.1 20180303 (Red Hat 7.3.1-5)]",
             (3, 6, 9, "final", 0),
             ["pypy-3.6", "pypy-3", "pypy3"],
-        ),
-        (
-            "2.7.13 (724f1a7d62e8, Dec 23 2019, 15:36:24)\n"
-            "[PyPy 7.3.0 with GCC 7.3.1 20180303 (Red Hat 7.3.1-5)]",
-            (2, 7, 13, "final", 42),
-            ["pypy-2.7", "pypy-2", "pypy2"],
         ),
     ],
 )
@@ -367,9 +359,9 @@ def test_is_running_on_actions(mocker, environ, expected):
     "option_env,environ,expected",
     [
         (None, {"TOXENV": "flake8"}, True),
-        (["py27,py38"], {}, True),
-        (["py27", "py38"], {}, True),
-        (["py27"], {"TOXENV": "flake8"}, True),
+        (["py37,py38"], {}, True),
+        (["py37", "py38"], {}, True),
+        (["py37"], {"TOXENV": "flake8"}, True),
         (None, {}, False),
     ],
 )

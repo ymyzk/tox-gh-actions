@@ -116,9 +116,7 @@ def get_python_version_keys():
     """Get Python version in string for getting factors from gh-action's config
 
     Examples:
-    - CPython 2.7.z => [2.7, 2]
     - CPython 3.8.z => [3.8, 3]
-    - PyPy 2.7 (v7.3.z) => [pypy-2.7, pypy-2, pypy2]
     - PyPy 3.6 (v7.3.z) => [pypy-3.6, pypy-3, pypy3]
     - Pyston based on Python CPython 3.8.8 (v2.2) => [pyston-3.8, pyston-3]
 
