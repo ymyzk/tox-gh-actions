@@ -1,79 +1,79 @@
 from itertools import product
+
+from logging import getLogger
 import os
 import sys
 from typing import Any, Dict, Iterable, List
 
-import pluggy
-from tox.config import Config, TestenvConfig, _split_env as split_env
-from tox.reporter import verbosity1, verbosity2
-from tox.venv import VirtualEnv
+from tox.config.loader.memory import MemoryLoader
+from tox.config.loader.str_convert import StrConvert
+from tox.config.main import Config
+from tox.config.of_type import _PLACE_HOLDER
+from tox.config.sets import ConfigSet
+from tox.config.types import EnvList
+from tox.plugin import impl
+
+logger = getLogger(__name__)
 
 
-hookimpl = pluggy.HookimplMarker("tox")
-
-
-@hookimpl
+@impl
 def tox_configure(config: Config) -> None:
-    verbosity1("running tox-gh-actions")
+    logger.info("running tox-gh-actions")
     if not is_running_on_actions():
-        verbosity1(
-            "tox-gh-actions won't override envlist "
-            "because tox is not running in GitHub Actions"
+        logger.warning(
+            "tox-gh-actions won't override envlist because tox is not running "
+            "in GitHub Actions"
         )
         return
     elif is_env_specified(config):
-        verbosity1(
+        logger.warning(
             "tox-gh-actions won't override envlist because "
             "envlist is explicitly given via TOXENV or -e option"
         )
-        return
 
-    verbosity2("original envconfigs: {}".format(list(config.envconfigs.keys())))
-    verbosity2("original envlist_default: {}".format(config.envlist_default))
-    verbosity2("original envlist: {}".format(config.envlist))
+    original_envlist: EnvList = config.core["envlist"]
+    # TODO We need to expire cache explicitly otherwise
+    #      the overridden envlist won't be read at all
+    config.core._defined["envlist"]._cache = _PLACE_HOLDER  # type: ignore
+    logger.debug("original envlist: %s", original_envlist.envs)
 
     versions = get_python_version_keys()
-    verbosity2("Python versions: {}".format(versions))
+    logger.debug("Python versions: {}".format(versions))
 
-    gh_actions_config = parse_config(config._cfg.sections)
-    verbosity2("tox-gh-actions config: {}".format(gh_actions_config))
+    gh_actions_config = load_config(config)
+    logger.debug("tox-gh-actions config: %s", gh_actions_config)
 
     factors = get_factors(gh_actions_config, versions)
-    verbosity2("using the following factors to decide envlist: {}".format(factors))
+    logger.debug("using the following factors to decide envlist: %s", factors)
 
-    envlist = get_envlist_from_factors(config.envlist, factors)
-    config.envlist_default = config.envlist = envlist
-    verbosity1("overriding envlist with: {}".format(envlist))
-
-
-@hookimpl
-def tox_runtest_pre(venv: VirtualEnv) -> None:
-    if is_running_on_actions():
-        envconfig: TestenvConfig = venv.envconfig
-        message = envconfig.envname
-        if envconfig.description:
-            message += " - " + envconfig.description
-        print("::group::tox: " + message)
+    envlist = get_envlist_from_factors(original_envlist.envs, factors)
+    config.core.loaders.insert(0, MemoryLoader(env_list=EnvList(envlist)))
+    logger.info("overriding envlist with: %s", envlist)
 
 
-@hookimpl
-def tox_runtest_post(venv: VirtualEnv) -> None:
-    if is_running_on_actions():
-        print("::endgroup::")
+def load_config(config: Config) -> Dict[str, Dict[str, Any]]:
+    # It's better to utilize ConfigSet to parse gh-actions configuration but
+    # we use our custom configuration parser at this point for compatibility with
+    # the existing config files and limitations in ConfigSet API.
+    python_config = {}
+    for loader in config.get_section_config("gh-actions", ConfigSet).loaders:
+        if "python" not in loader.found_keys():
+            continue
+        python_config = parse_factors_dict(loader.load_raw("python", None, None))
 
+    env = {}
+    for loader in config.get_section_config("gh-actions:env", ConfigSet).loaders:
+        for env_variable in loader.found_keys():
+            if env_variable.upper() in env:
+                continue
+            env[env_variable.upper()] = parse_factors_dict(
+                loader.load_raw(env_variable, None, None)
+            )
 
-def parse_config(config: Dict[str, Dict[str, str]]) -> Dict[str, Dict[str, Any]]:
-    """Parse gh-actions section in tox.ini"""
-    config_python = parse_dict(config.get("gh-actions", {}).get("python", ""))
-    config_env = {
-        name: {k: split_env(v) for k, v in parse_dict(conf).items()}
-        for name, conf in config.get("gh-actions:env", {}).items()
-    }
-    # Example of split_env:
-    # "py{27,38}" => ["py27", "py38"]
+    # TODO Use more precise type
     return {
-        "python": {k: split_env(v) for k, v in config_python.items()},
-        "env": config_env,
+        "python": python_config,
+        "env": env,
     }
 
 
@@ -84,7 +84,7 @@ def get_factors(
     factors: List[List[str]] = []
     for version in versions:
         if version in gh_actions_config["python"]:
-            verbosity2("got factors for Python version: {}".format(version))
+            logger.debug("got factors for Python version: %s", version)
             factors.append(gh_actions_config["python"][version])
             break  # Shouldn't check remaining versions
     for env, env_config in gh_actions_config.get("env", {}).items():
@@ -146,10 +146,25 @@ def is_env_specified(config: Config) -> bool:
     if os.environ.get("TOXENV"):
         # When TOXENV is a non-empty string
         return True
-    elif config.option.env is not None:
+    elif hasattr(config.options, "env") and not config.options.env.use_default_list:
         # When command line argument (-e) is given
         return True
     return False
+
+
+def parse_factors_dict(value: str) -> Dict[str, List[str]]:
+    """Parse a dict value from key to factors.
+
+    For example, this function converts an input
+        3.8: py38, docs
+        3.9: py39-django{2,3}
+    to a dict
+    {
+        "3.8": ["py38", "docs"],
+        "3.9": ["py39-django2", "py39-django3"],
+    }
+    """
+    return {k: StrConvert.to_env_list(v).envs for k, v in parse_dict(value).items()}
 
 
 # The following function was copied from

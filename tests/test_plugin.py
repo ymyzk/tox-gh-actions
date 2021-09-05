@@ -1,73 +1,6 @@
 import pytest
-from tox.config import Config
 
 from tox_gh_actions import plugin
-
-
-@pytest.mark.parametrize(
-    "config,expected",
-    [
-        (
-            {
-                "gh-actions": {
-                    "python": """3.7: py37
-3.8: py38
-3.9: py39, flake8"""
-                }
-            },
-            {
-                "python": {
-                    "3.7": ["py37"],
-                    "3.8": ["py38"],
-                    "3.9": ["py39", "flake8"],
-                },
-                "env": {},
-            },
-        ),
-        (
-            {
-                "gh-actions": {
-                    "python": """3.7: py37
-3.8: py38"""
-                },
-                "gh-actions:env": {
-                    "PLATFORM": """ubuntu-latest: linux
-macos-latest: macos
-windows-latest: windows"""
-                },
-            },
-            {
-                "python": {
-                    "3.7": ["py37"],
-                    "3.8": ["py38"],
-                },
-                "env": {
-                    "PLATFORM": {
-                        "ubuntu-latest": ["linux"],
-                        "macos-latest": ["macos"],
-                        "windows-latest": ["windows"],
-                    },
-                },
-            },
-        ),
-        (
-            {"gh-actions": {}},
-            {
-                "python": {},
-                "env": {},
-            },
-        ),
-        (
-            {},
-            {
-                "python": {},
-                "env": {},
-            },
-        ),
-    ],
-)
-def test_parse_config(config, expected):
-    assert plugin.parse_config(config) == expected
 
 
 @pytest.mark.parametrize(
@@ -353,21 +286,3 @@ def test_get_version_keys_on_pyston(mocker):
 def test_is_running_on_actions(mocker, environ, expected):
     mocker.patch("tox_gh_actions.plugin.os.environ", environ)
     assert plugin.is_running_on_actions() == expected
-
-
-@pytest.mark.parametrize(
-    "option_env,environ,expected",
-    [
-        (None, {"TOXENV": "flake8"}, True),
-        (["py37,py38"], {}, True),
-        (["py37", "py38"], {}, True),
-        (["py37"], {"TOXENV": "flake8"}, True),
-        (None, {}, False),
-    ],
-)
-def test_is_env_specified(mocker, option_env, environ, expected):
-    mocker.patch("tox_gh_actions.plugin.os.environ", environ)
-    option = mocker.MagicMock()
-    option.env = option_env
-    config = Config(None, option, None, mocker.MagicMock(), [])
-    assert plugin.is_env_specified(config) == expected
