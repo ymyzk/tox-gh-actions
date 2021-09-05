@@ -23,6 +23,28 @@ from tox_gh_actions import plugin
                     "3.6": ["py36"],
                     "3.7": ["py37", "flake8"],
                 },
+                "envs_are_optional": None,
+                "env": {},
+            },
+        ),
+        (
+            {
+                "gh-actions": {
+                    "python": """2.7: py27
+3.5: py35
+3.6: py36
+3.7: py37, flake8""",
+                    "envs_are_optional": "true",
+                }
+            },
+            {
+                "python": {
+                    "2.7": ["py27"],
+                    "3.5": ["py35"],
+                    "3.6": ["py36"],
+                    "3.7": ["py37", "flake8"],
+                },
+                "envs_are_optional": True,
                 "env": {},
             },
         ),
@@ -43,6 +65,7 @@ windows-latest: windows"""
                     "2.7": ["py27"],
                     "3.8": ["py38"],
                 },
+                "envs_are_optional": None,
                 "env": {
                     "PLATFORM": {
                         "ubuntu-latest": ["linux"],
@@ -56,6 +79,31 @@ windows-latest: windows"""
             {"gh-actions": {}},
             {
                 "python": {},
+                "envs_are_optional": None,
+                "env": {},
+            },
+        ),
+        (
+            {
+                "gh-actions": {
+                    "envs_are_optional": "false",
+                }
+            },
+            {
+                "python": {},
+                "envs_are_optional": False,
+                "env": {},
+            },
+        ),
+        (
+            {
+                "gh-actions": {
+                    "unknown": "unknown",
+                }
+            },
+            {
+                "python": {},
+                "envs_are_optional": None,
                 "env": {},
             },
         ),
@@ -63,6 +111,7 @@ windows-latest: windows"""
             {},
             {
                 "python": {},
+                "envs_are_optional": None,
                 "env": {},
             },
         ),
@@ -85,7 +134,7 @@ def test_parse_config(config, expected):
             },
             ["2.7", "2"],
             {},
-            ["py27", "flake8"],
+            [["py27", "flake8"]],
         ),
         # Get factors using less precise Python version
         (
@@ -98,7 +147,7 @@ def test_parse_config(config, expected):
             },
             ["3.8", "3"],
             {},
-            ["py3", "flake8"],
+            [["py3", "flake8"]],
         ),
         # Get factors only from the most precise Python version
         (
@@ -112,7 +161,7 @@ def test_parse_config(config, expected):
             },
             ["3.9", "3"],
             {},
-            ["py39"],
+            [["py39"]],
         ),
         (
             {
@@ -132,7 +181,7 @@ def test_parse_config(config, expected):
                 "SAMPLE": "VALUE1",
                 "HOGE": "VALUE3",
             },
-            ["py27-fact1", "py27-fact2", "flake8-fact1", "flake8-fact2"],
+            [["py27", "flake8"], ["fact1", "fact2"]],
         ),
         (
             {
@@ -156,16 +205,7 @@ def test_parse_config(config, expected):
                 "SAMPLE": "VALUE1",
                 "HOGE": "VALUE3",
             },
-            [
-                "py27-fact1-fact5",
-                "py27-fact1-fact6",
-                "py27-fact2-fact5",
-                "py27-fact2-fact6",
-                "flake8-fact1-fact5",
-                "flake8-fact1-fact6",
-                "flake8-fact2-fact5",
-                "flake8-fact2-fact6",
-            ],
+            [["py27", "flake8"], ["fact1", "fact2"], ["fact5", "fact6"]],
         ),
         (
             {
@@ -185,12 +225,7 @@ def test_parse_config(config, expected):
                 "SAMPLE": "VALUE1",
                 "HOGE": "VALUE3",
             },
-            [
-                "py27-django18",
-                "py27-flake8",
-                "flake8-django18",
-                "flake8-flake8",
-            ],
+            [["py27", "flake8"], ["django18", "flake8"]],
         ),
         (
             {
@@ -210,7 +245,7 @@ def test_parse_config(config, expected):
             {
                 "SAMPLE": "VALUE3",
             },
-            ["py27", "flake8"],
+            [["py27", "flake8"]],
         ),
         (
             {
@@ -229,7 +264,7 @@ def test_parse_config(config, expected):
             {
                 "SAMPLE": "VALUE2",
             },
-            ["py38", "flake8"],
+            [["py38", "flake8"]],
         ),
         (
             {
@@ -260,48 +295,74 @@ def test_get_factors(mocker, config, version, environ, expected):
 
 def normalize_factors_list(factors):
     """Utility to make it compare equality of a list of factors"""
-    result = [tuple(sorted(f.split("-"))) for f in factors]
-    result.sort()
-    return result
+    return [factors[:1], {frozenset(f) for f in factors[1:]}]
 
 
 @pytest.mark.parametrize(
-    "envlist,factors,expected",
+    "envlist,factors,lax,expected",
     [
         (
             ["py27", "py37", "flake8"],
-            ["py37", "flake8"],
+            [["py37", "flake8"]],
+            [True, False],
             ["py37", "flake8"],
         ),
         (
             ["py27", "py37", "flake8"],
             [],
+            [True, False],
             [],
         ),
         (
             [],
-            ["py37", "flake8"],
+            [["py37", "flake8"]],
+            [True, False],
             [],
         ),
         (
             ["py27-dj111", "py37-dj111", "py37-dj20", "flake8"],
-            ["py37", "flake8"],
+            [["py37", "flake8"]],
+            [True, False],
             ["py37-dj111", "py37-dj20", "flake8"],
         ),
         (
             ["py27-django18", "py37-django18", "flake8"],
-            [
-                "py27-django18",
-                "py27-flake8",
-                "flake8-django18",
-                "flake8-flake8",
-            ],
+            [["py27", "flake8"], ["django18", "flake8"]],
+            [True, False],
             ["py27-django18", "flake8"],
+        ),
+        # The following two show the difference between lax and non lax selection:
+        (
+            ["py27-dj111", "py37-dj111", "py37-dj20", "flake8"],
+            [["py37", "flake8"], ["dj111"]],
+            [True],
+            ["py37-dj111", "flake8"],
+        ),
+        (
+            ["py27-dj111", "py37-dj111", "py37-dj20", "flake8"],
+            [["py37", "flake8"], ["dj111"]],
+            [False],
+            ["py37-dj111"],
+        ),
+        # When lax selection is enabled the most specific match is used rather than
+        # selecting any match:
+        (
+            ["py27-dj111", "py37-dj111", "py37-dj20", "flake8", "flake8-dj111"],
+            [["py37", "flake8"], ["dj111"]],
+            [True],
+            ["py37-dj111", "flake8-dj111"],
+        ),
+        (
+            ["py27-dj111", "py37-dj111", "py37-dj20", "flake8", "flake8-dj111"],
+            [["py37", "flake8"], ["dj111"]],
+            [False],
+            ["py37-dj111", "flake8-dj111"],
         ),
     ],
 )
-def test_get_envlist_from_factors(envlist, factors, expected):
-    assert plugin.get_envlist_from_factors(envlist, factors) == expected
+def test_get_envlist_from_factors(envlist, factors, lax, expected):
+    for _lax in lax:
+        assert plugin.get_envlist_from_factors(envlist, factors, _lax) == expected
 
 
 @pytest.mark.parametrize(
