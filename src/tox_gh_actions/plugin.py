@@ -5,7 +5,7 @@ from typing import Any, Dict, Iterable, List
 
 import pluggy
 from tox.config import Config, TestenvConfig, _split_env as split_env
-from tox.reporter import verbosity1, verbosity2
+from tox.reporter import verbosity1, verbosity2, warning
 from tox.venv import VirtualEnv
 
 
@@ -87,6 +87,7 @@ def get_factors(gh_actions_config, versions):
     factors = []  # type: List[List[str]]
     for version in versions:
         if version in gh_actions_config["python"]:
+            show_deprecation_warning_for_old_style_pypy_config(version)
             verbosity2("got factors for Python version: {}".format(version))
             factors.append(gh_actions_config["python"][version])
             break  # Shouldn't check remaining versions
@@ -96,6 +97,27 @@ def get_factors(gh_actions_config, versions):
             if env_value in env_config:
                 factors.append(env_config[env_value])
     return [x for x in map(lambda f: "-".join(f), product(*factors)) if x]
+
+
+def show_deprecation_warning_for_old_style_pypy_config(version):
+    # type: (str) -> None
+    if version not in {"pypy2", "pypy3"}:
+        return
+    warning(
+        """PendingDeprecationWarning
+Support of old-style PyPy config keys will be removed in tox-gh-actions v3.
+Please use "pypy-2" and "pypy-3" instead of "pypy2" and "pypy3".
+
+Example of tox.ini:
+[gh-actions]
+python =
+    pypy-2: pypy2
+    pypy-3: pypy3
+    # The followings won't work with tox-gh-actions v3
+    # pypy2: pypy2
+    # pypy3: pypy3
+    """
+    )
 
 
 def get_envlist_from_factors(envlist, factors):

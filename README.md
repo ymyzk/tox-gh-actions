@@ -198,9 +198,13 @@ envlist = py2, py3, pypy2, pypy3
 python =
     2: py2
     3: py3, mypy
-    # pypy2 and pypy3 are still supported for backward compatibility
     pypy-2: pypy2
     pypy-3: pypy3
+
+    # Using pypy2 and pypy3 as a key in still supported for backward compatibility
+    # but the support will be removed in tox-gh-actions v3.
+    # pypy2: pypy2
+    # pypy3: pypy3
 
 [testenv]
 ...
