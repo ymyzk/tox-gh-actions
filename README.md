@@ -278,6 +278,15 @@ tox-gh-actions respects the given environments and simply runs the given environ
 
 Before 2.0, tox-gh-actions was always enforcing its configuration even when a list of environments is given explicitly.
 
+## Versioning
+This project follows [PEP 440](https://www.python.org/dev/peps/pep-0440/) and uses a format of major.minor.patch (X.Y.Z).
+The major version (X) will be incremented when we make backward incompatible changes to a public API.
+The public API of this project is the configuration of tox-gh-actions.
+The major version can be also incremented when we require a new version of tox.
+
+This project tries not to introduce backward incompatibles changes as much as possible so that users don't need to
+update their project's configuration too frequently.
+
 ## Understanding Behavior of tox-gh-actions
 ### How tox-gh-actions Works
 See [ARCHITECTURE.md](./ARCHITECTURE.md) for more details.
