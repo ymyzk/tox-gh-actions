@@ -8,6 +8,13 @@
 with multiple different Python versions on multiple workers in parallel.
 This project is inspired by [tox-travis](https://github.com/tox-dev/tox-travis).
 
+This branch is under active development to support tox v4.
+Preliminary support is already implemented.
+To try the plugin with tox v4, please run:
+```shell
+$ pip install git+https://github.com/ymyzk/tox-gh-actions.git@tox4
+```
+
 ## Features
 When running tox on GitHub Actions, tox-gh-actions
 * detects which environment to run based on configurations and
