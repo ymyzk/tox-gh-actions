@@ -1,15 +1,22 @@
 from itertools import product
 import os
 import sys
+import threading
 from typing import Any, Dict, Iterable, List
 
 import pluggy
+from tox.action import Action
 from tox.config import Config, TestenvConfig, _split_env as split_env
 from tox.reporter import verbosity1, verbosity2, warning
 from tox.venv import VirtualEnv
 
 
 hookimpl = pluggy.HookimplMarker("tox")
+
+# Using thread local for just in case tox uses multiple threads for execution.
+# tox seems to be using multiple processes at this point.
+thread_locals = threading.local()
+thread_locals.is_grouping_started = {}
 
 
 @hookimpl
@@ -48,14 +55,24 @@ def tox_configure(config):
 
 
 @hookimpl
+def tox_testenv_create(venv, action):
+    # type: (VirtualEnv, Action) -> None
+    if is_running_on_actions():
+        start_grouping_if_necessary(venv)
+
+
+@hookimpl
+def tox_testenv_install_deps(venv, action):
+    # type: (VirtualEnv, Action) -> None
+    if is_running_on_actions():
+        start_grouping_if_necessary(venv)
+
+
+@hookimpl
 def tox_runtest_pre(venv):
     # type: (VirtualEnv) -> None
     if is_running_on_actions():
-        envconfig = venv.envconfig  # type: TestenvConfig
-        message = envconfig.envname
-        if envconfig.description:
-            message += " - " + envconfig.description
-        print("::group::tox: " + message)
+        start_grouping_if_necessary(venv)
 
 
 @hookimpl
@@ -63,6 +80,29 @@ def tox_runtest_post(venv):
     # type: (VirtualEnv) -> None
     if is_running_on_actions():
         print("::endgroup::")
+
+
+def start_grouping_if_necessary(venv):
+    # type: (VirtualEnv) -> None
+    """Start log line grouping when necessary.
+
+    This function can be called multiple times when running a test environment
+    and it ensures that "::group::" is written only once.
+
+    We shouldn't call this from tox_package and tox_get_python_executable hooks
+    because of the timing issue.
+    """
+    envconfig = venv.envconfig  # type: TestenvConfig
+    envname = envconfig.envname
+
+    if thread_locals.is_grouping_started.get(envname, False):
+        return
+    thread_locals.is_grouping_started[envname] = True
+
+    message = envname
+    if envconfig.description:
+        message += " - " + envconfig.description
+    print("::group::tox: " + message)
 
 
 def parse_config(config):
