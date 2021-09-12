@@ -22,6 +22,20 @@ def test_start_grouping_if_necessary(capsys, mocker):
     assert out2 == ""
 
 
+def test_start_grouping_ignores_isolated_build_env(capsys, mocker):
+    envconfig = mocker.MagicMock()
+    envconfig.envname = ".package"
+    envconfig.description = "isolated packaging environment"
+    envconfig.config.isolated_build_env = ".package"
+    venv = mocker.MagicMock()
+    venv.envconfig = envconfig
+
+    # Start grouping in the first call
+    plugin.start_grouping_if_necessary(venv)
+    out, _ = capsys.readouterr()
+    assert out == ""
+
+
 @pytest.mark.parametrize(
     "config,expected",
     [
