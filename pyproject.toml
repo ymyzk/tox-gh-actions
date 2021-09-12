@@ -19,5 +19,10 @@ source = [
    "*/site-packages",
 ]
 
+[tool.pytest.ini_options]
+markers = [
+    "integration: mark as an integration test.",
+]
+
 [tool.setuptools_scm]
 write_to = "src/tox_gh_actions/version.py"
