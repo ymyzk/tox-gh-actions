@@ -4,6 +4,24 @@ from tox.config import Config
 from tox_gh_actions import plugin
 
 
+def test_start_grouping_if_necessary(capsys, mocker):
+    envconfig = mocker.MagicMock()
+    envconfig.envname = "test123"
+    envconfig.description = "This is a test environment."
+    venv = mocker.MagicMock()
+    venv.envconfig = envconfig
+
+    # Start grouping in the first call
+    plugin.start_grouping_if_necessary(venv)
+    out1, _ = capsys.readouterr()
+    assert out1 == "::group::tox: test123 - This is a test environment.\n"
+
+    # Should not start groping again in the second call
+    plugin.start_grouping_if_necessary(venv)
+    out2, _ = capsys.readouterr()
+    assert out2 == ""
+
+
 @pytest.mark.parametrize(
     "config,expected",
     [
