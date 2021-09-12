@@ -106,13 +106,13 @@ def test_parse_config(config, expected):
                 "python": {
                     "2": ["py2", "flake8"],
                     "3": ["py3", "flake8"],
-                    "3.9": ["py39"],
+                    "3.10": ["py310"],
                 },
                 "unknown": {},
             },
-            ["3.9", "3"],
+            ["3.10", "3"],
             {},
-            ["py39"],
+            ["py310"],
         ),
         (
             {
