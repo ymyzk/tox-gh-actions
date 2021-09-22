@@ -6,6 +6,7 @@ import sys
 from typing import Any, Dict, Iterable, List
 
 from tox.config.loader.memory import MemoryLoader
+from tox.config.loader.section import Section
 from tox.config.loader.str_convert import StrConvert
 from tox.config.main import Config
 from tox.config.of_type import _PLACE_HOLDER
@@ -17,7 +18,7 @@ logger = getLogger(__name__)
 
 
 @impl
-def tox_configure(config: Config) -> None:
+def tox_add_core_config(core_conf: ConfigSet, config: Config) -> None:
     logger.info("running tox-gh-actions")
     if not is_running_on_actions():
         logger.warning(
@@ -51,18 +52,23 @@ def tox_configure(config: Config) -> None:
     logger.info("overriding envlist with: %s", envlist)
 
 
+class EmptyConfigSet(ConfigSet):
+    def register_config(self) -> None:
+        pass
+
+
 def load_config(config: Config) -> Dict[str, Dict[str, Any]]:
     # It's better to utilize ConfigSet to parse gh-actions configuration but
     # we use our custom configuration parser at this point for compatibility with
     # the existing config files and limitations in ConfigSet API.
     python_config = {}
-    for loader in config.get_section_config("gh-actions", ConfigSet).loaders:
+    for loader in load_config_section(config, "gh-actions").loaders:
         if "python" not in loader.found_keys():
             continue
         python_config = parse_factors_dict(loader.load_raw("python", None, None))
 
     env = {}
-    for loader in config.get_section_config("gh-actions:env", ConfigSet).loaders:
+    for loader in load_config_section(config, "gh-actions:env").loaders:
         for env_variable in loader.found_keys():
             if env_variable.upper() in env:
                 continue
@@ -75,6 +81,12 @@ def load_config(config: Config) -> Dict[str, Dict[str, Any]]:
         "python": python_config,
         "env": env,
     }
+
+
+def load_config_section(config: Config, section_name: str) -> ConfigSet:
+    return config.get_section_config(
+        Section(None, section_name), base=[], of_type=EmptyConfigSet, for_env=None
+    )
 
 
 def get_factors(
