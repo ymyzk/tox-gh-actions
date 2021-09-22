@@ -53,32 +53,37 @@ def tox_configure(config):
     config.envlist_default = config.envlist = envlist
     verbosity1("overriding envlist with: {}".format(envlist))
 
+    if not is_log_grouping_enabled(config):
+        verbosity2(
+            "disabling log line grouping on GitHub Actions based on the configuration"
+        )
+
 
 @hookimpl
 def tox_testenv_create(venv, action):
     # type: (VirtualEnv, Action) -> None
-    if is_running_on_actions():
+    if is_log_grouping_enabled(venv.envconfig.config):
         start_grouping_if_necessary(venv)
 
 
 @hookimpl
 def tox_testenv_install_deps(venv, action):
     # type: (VirtualEnv, Action) -> None
-    if is_running_on_actions():
+    if is_log_grouping_enabled(venv.envconfig.config):
         start_grouping_if_necessary(venv)
 
 
 @hookimpl
 def tox_runtest_pre(venv):
     # type: (VirtualEnv) -> None
-    if is_running_on_actions():
+    if is_log_grouping_enabled(venv.envconfig.config):
         start_grouping_if_necessary(venv)
 
 
 @hookimpl
 def tox_runtest_post(venv):
     # type: (VirtualEnv) -> None
-    if is_running_on_actions():
+    if is_log_grouping_enabled(venv.envconfig.config):
         print("::endgroup::")
 
 
@@ -216,6 +221,20 @@ def is_running_on_actions():
     # See the following document on which environ to use for this purpose.
     # https://docs.github.com/en/free-pro-team@latest/actions/reference/environment-variables#default-environment-variables
     return os.environ.get("GITHUB_ACTIONS") == "true"
+
+
+def is_log_grouping_enabled(config):
+    # type: (Config) -> bool
+    """Returns True when the plugin should enable log line grouping
+
+    This plugin won't enable grouping when both --parallel and --parallel-live are
+    enabled because log lines from different environments will be mixed.
+    """
+    if not is_running_on_actions():
+        return False
+    if config.option.parallel > 1 and config.option.parallel_live:
+        return False
+    return True
 
 
 def is_env_specified(config):

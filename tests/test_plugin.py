@@ -396,6 +396,30 @@ def test_is_running_on_actions(mocker, environ, expected):
 
 
 @pytest.mark.parametrize(
+    "environ,parallel,parallel_live,expected",
+    [
+        ({"GITHUB_ACTIONS": "true"}, 0, False, True),
+        ({"GITHUB_ACTIONS": "true"}, 1, False, True),
+        ({"GITHUB_ACTIONS": "true"}, 8, False, True),
+        ({"GITHUB_ACTIONS": "true"}, 0, True, True),
+        ({"GITHUB_ACTIONS": "true"}, 1, True, True),
+        ({"GITHUB_ACTIONS": "true"}, 8, True, False),
+        ({"GITHUB_ACTIONS": "true"}, 0, False, True),
+        ({"GITHUB_ACTIONS": "false"}, 0, False, False),
+        ({"GITHUB_ACTIONS": "false"}, 8, False, False),
+        ({"GITHUB_ACTIONS": "false"}, 0, True, False),
+        ({"GITHUB_ACTIONS": "false"}, 8, True, False),
+    ],
+)
+def test_is_log_grouping_enabled(mocker, environ, parallel, parallel_live, expected):
+    mocker.patch("tox_gh_actions.plugin.os.environ", environ)
+    config = mocker.MagicMock()
+    config.option.parallel = parallel
+    config.option.parallel_live = parallel_live
+    assert plugin.is_log_grouping_enabled(config) == expected
+
+
+@pytest.mark.parametrize(
     "option_env,environ,expected",
     [
         (None, {"TOXENV": "flake8"}, True),
