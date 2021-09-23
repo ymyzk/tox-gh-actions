@@ -12,7 +12,7 @@ This branch is under active development to support tox v4.
 Preliminary support is already implemented.
 To try the plugin with tox v4, please run:
 ```shell
-$ pip install git+https://github.com/ymyzk/tox-gh-actions.git@tox4
+$ pip install --pre tox-gh-actions
 ```
 
 ## Features
