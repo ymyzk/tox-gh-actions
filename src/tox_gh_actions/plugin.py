@@ -5,6 +5,7 @@ import os
 import sys
 from typing import Any, Dict, Iterable, List
 
+from tox.config.cli.parser import Parsed
 from tox.config.loader.memory import MemoryLoader
 from tox.config.loader.section import Section
 from tox.config.loader.str_convert import StrConvert
@@ -12,7 +13,9 @@ from tox.config.main import Config
 from tox.config.of_type import _PLACE_HOLDER
 from tox.config.sets import ConfigSet
 from tox.config.types import EnvList
+from tox.execute.api import Outcome
 from tox.plugin import impl
+from tox.tox_env.api import ToxEnv
 
 logger = getLogger(__name__)
 
@@ -50,6 +53,29 @@ def tox_add_core_config(core_conf: ConfigSet, config: Config) -> None:
     envlist = get_envlist_from_factors(original_envlist.envs, factors)
     config.core.loaders.insert(0, MemoryLoader(env_list=EnvList(envlist)))
     logger.info("overriding envlist with: %s", envlist)
+
+    if not is_log_grouping_enabled(config.options):
+        logger.debug(
+            "disabling log line grouping on GitHub Actions based on the configuration"
+        )
+
+
+@impl
+def tox_before_run_commands(tox_env: ToxEnv) -> None:
+    if is_log_grouping_enabled(tox_env.options):
+        message = tox_env.name
+        description = tox_env.conf["description"]  # type: str
+        if description:
+            message += " - " + description
+        print("::group::tox: " + message)
+
+
+@impl
+def tox_after_run_commands(
+    tox_env: ToxEnv, exit_code: int, outcomes: List[Outcome]
+) -> None:
+    if is_log_grouping_enabled(tox_env.options):
+        print("::endgroup::")
 
 
 class EmptyConfigSet(ConfigSet):
@@ -151,6 +177,25 @@ def is_running_on_actions() -> bool:
     # See the following document on which environ to use for this purpose.
     # https://docs.github.com/en/free-pro-team@latest/actions/reference/environment-variables#default-environment-variables
     return os.environ.get("GITHUB_ACTIONS") == "true"
+
+
+def is_log_grouping_enabled(options: Parsed) -> bool:
+    """Returns True when the plugin should enable log line grouping
+
+    This plugin won't enable grouping when --parallel is enabled
+    because log lines from different environments will be mixed.
+    """
+    if not is_running_on_actions():
+        return False
+
+    # The parallel option is not always defined (e.g., `tox run`) so we should check
+    # its existence first.
+    # As --parallel-live option doesn't seems to be working correctly,
+    # this condition is more conservative compared to the plugin for tox 3.
+    if hasattr(options, "parallel") and options.parallel > 0:
+        return False
+
+    return True
 
 
 def is_env_specified(config: Config) -> bool:
