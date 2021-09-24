@@ -102,7 +102,8 @@ def start_grouping_if_necessary(venv):
 
     # Do not enable grouping for an environment used for isolated build
     # because we don't have a hook to write "::endgroup::" for this environment.
-    if envname == envconfig.config.isolated_build_env:
+    # TODO Make sure the exact condition when isolated_build_env is not set
+    if envname == getattr(envconfig.config, "isolated_build_env", ""):
         return
 
     if thread_locals.is_grouping_started.get(envname, False):
