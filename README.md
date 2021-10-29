@@ -181,7 +181,7 @@ python =
     3.8: py38, mypy
     pypy-2.7: pypy2
     pypy-3.7: pypy3
-    pyston-3.8: python38
+    pyston-3.8: pyston38
 
 [testenv]
 ...
