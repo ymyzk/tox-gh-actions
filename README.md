@@ -159,7 +159,7 @@ envlist = py39, py310
 python =
     3.9: py39
     3.10: py310
-    # The followings won't work
+    # The following won't work
     # 3.10-beta.3: py310
     # 3.10-dev: py310
 
