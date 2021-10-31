@@ -159,7 +159,7 @@ envlist = py39, py310
 python =
     3.9: py39
     3.10: py310
-    # The followings won't work
+    # The following won't work
     # 3.10-beta.3: py310
     # 3.10-dev: py310
 
@@ -181,7 +181,7 @@ python =
     3.8: py38, mypy
     pypy-2.7: pypy2
     pypy-3.7: pypy3
-    pyston-3.8: python38
+    pyston-3.8: pyston38
 
 [testenv]
 ...
