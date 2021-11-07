@@ -1,4 +1,5 @@
-# tox-gh-actions
+# tox-gh-actions <!-- omit in toc -->
+
 [![PyPI version](https://badge.fury.io/py/tox-gh-actions.svg)](https://badge.fury.io/py/tox-gh-actions)
 [![PyPI Supported Python Versions](https://img.shields.io/pypi/pyversions/tox-gh-actions.svg)](https://pypi.python.org/pypi/tox-gh-actions/)
 [![GitHub Actions (Tests)](https://github.com/ymyzk/tox-gh-actions/workflows/Tests/badge.svg)](https://github.com/ymyzk/tox-gh-actions)
@@ -14,6 +15,21 @@ To try the plugin with tox v4, please run:
 ```shell
 $ pip install --pre tox-gh-actions
 ```
+
+- [Features](#features)
+- [Usage](#usage)
+- [Examples](#examples)
+  - [Basic Example](#basic-example)
+    - [tox-gh-actions Configuration](#tox-gh-actions-configuration)
+    - [Workflow Configuration](#workflow-configuration)
+  - [Advanced Examples](#advanced-examples)
+    - [Factor-Conditional Settings: Python Version](#factor-conditional-settings-python-version)
+    - [Factor-Conditional Settings: Environment Variable](#factor-conditional-settings-environment-variable)
+  - [Overriding Environments to Run](#overriding-environments-to-run)
+- [Versioning](#versioning)
+- [Understanding Behavior of tox-gh-actions](#understanding-behavior-of-tox-gh-actions)
+  - [How tox-gh-actions Works](#how-tox-gh-actions-works)
+  - [Logging](#logging)
 
 ## Features
 When running tox on GitHub Actions, tox-gh-actions
