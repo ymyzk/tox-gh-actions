@@ -128,7 +128,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install tox tox-gh-actions
+        python -m pip install tox tox-gh-actions
     - name: Test with tox
       run: tox
 ```
@@ -266,7 +266,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install tox tox-gh-actions
+        python -m pip install tox tox-gh-actions
     - name: Test with tox
       run: tox
       env:
