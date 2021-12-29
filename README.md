@@ -231,8 +231,8 @@ _Changed in 3.0_: `pypy3` is not supported in the configuration anymore. Please 
 You can also use environment variable to decide which environment to run.
 The following is an example to install different dependency based on platform.
 It will create 9 jobs when running the workflow on GitHub Actions.
-- On Python 3.6/ubuntu-latest job, tox runs `py36-linux` environment
-- On Python 3.7/ubuntu-latest job, tox runs `py37-linux` environment
+- On Python 3.8/ubuntu-latest job, tox runs `py38-linux` environment
+- On Python 3.9/ubuntu-latest job, tox runs `py39-linux` environment
 - and so on.
 
 `.github/workflows/<workflow>.yml`:
@@ -249,7 +249,7 @@ jobs:
     strategy:
       matrix:
         platform: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: [3.6, 3.7, 3.8]
+        python-version: ['3.8', '3.9', '3.10']
 
     steps:
     - uses: actions/checkout@v1
@@ -270,13 +270,13 @@ jobs:
 `tox.ini`:
 ```ini
 [tox]
-envlist = py{36,37,38}-{linux,macos,windows}
+envlist = py{38,39,310}-{linux,macos,windows}
 
 [gh-actions]
 python =
-    3.6: py36
-    3.7: py37
     3.8: py38
+    3.9: py39
+    3.10: py310
 
 [gh-actions:env]
 PLATFORM =
