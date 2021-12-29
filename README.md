@@ -45,10 +45,10 @@ When running tox on GitHub Actions, tox-gh-actions
 ## Examples
 ### Basic Example
 The following configuration will create 4 jobs when running the workflow on GitHub Actions.
-- On Python 3.6 job, tox runs `py36` environment
 - On Python 3.7 job, tox runs `py37` environment
-- On Python 3.8 job, tox runs `py38` and `mypy` environments
+- On Python 3.8 job, tox runs `py38` environment
 - On Python 3.9 job, tox runs `py39` environment
+- On Python 3.10 job, tox runs `py310` and `mypy` environments
 
 #### tox-gh-actions Configuration
 Add `[gh-actions]` section to the same file as tox's configuration.
@@ -56,14 +56,14 @@ Add `[gh-actions]` section to the same file as tox's configuration.
 If you're using `tox.ini`:
 ```ini
 [tox]
-envlist = py36, py37, py38, py39, mypy
+envlist = py37, py38, py39, py310, mypy
 
 [gh-actions]
 python =
-    3.6: py36
     3.7: py37
-    3.8: py38, mypy
+    3.8: py38
     3.9: py39
+    3.10: py310, mypy
 
 [testenv]
 ...
@@ -72,14 +72,14 @@ python =
 If you're using `setup.cfg`:
 ```ini
 [tox:tox]
-envlist = py36, py37, py38, py39, mypy
+envlist = py37, py38, py39, py310, mypy
 
 [gh-actions]
 python =
-    3.6: py36
     3.7: py37
-    3.8: py38, mypy
+    3.8: py38
     3.9: py39
+    3.10: py310, mypy
 
 [testenv]
 ...
@@ -90,14 +90,14 @@ If you're using `pyproject.toml`:
 [tool.tox]
 legacy_tox_ini = """
 [tox]
-envlist = py36, py37, py38, py39, mypy
+envlist = py37, py38, py39, py310, mypy
 
 [gh-actions]
 python =
-    3.6: py36
     3.7: py37
-    3.8: py38, mypy
+    3.8: py38
     3.9: py39
+    3.10: py310, mypy
 
 [testenv]
 """
@@ -117,7 +117,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.6, 3.7, 3.8, 3.9]
+        python-version: ['3.7', '3.8', '3.9', '3.10']
 
     steps:
     - uses: actions/checkout@v1
