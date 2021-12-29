@@ -11,7 +11,7 @@ from tox.config.loader.section import Section
 from tox.config.loader.str_convert import StrConvert
 from tox.config.main import Config
 from tox.config.of_type import _PLACE_HOLDER
-from tox.config.sets import ConfigSet
+from tox.config.sets import ConfigSet, CoreConfigSet
 from tox.config.types import EnvList
 from tox.execute.api import Outcome
 from tox.plugin import impl
@@ -36,9 +36,6 @@ def tox_add_core_config(core_conf: ConfigSet, config: Config) -> None:
         )
 
     original_envlist: EnvList = config.core["envlist"]
-    # TODO We need to expire cache explicitly otherwise
-    #      the overridden envlist won't be read at all
-    config.core._defined["envlist"]._cache = _PLACE_HOLDER  # type: ignore
     logger.debug("original envlist: %s", original_envlist.envs)
 
     versions = get_python_version_keys()
@@ -51,8 +48,7 @@ def tox_add_core_config(core_conf: ConfigSet, config: Config) -> None:
     logger.debug("using the following factors to decide envlist: %s", factors)
 
     envlist = get_envlist_from_factors(original_envlist.envs, factors)
-    config.core.loaders.insert(0, MemoryLoader(env_list=EnvList(envlist)))
-    logger.info("overriding envlist with: %s", envlist)
+    override_envlist(config.core, EnvList(envlist))
 
     if not is_log_grouping_enabled(config.options):
         logger.debug(
@@ -113,6 +109,19 @@ def load_config_section(config: Config, section_name: str) -> ConfigSet:
     return config.get_section_config(
         Section(None, section_name), base=[], of_type=EmptyConfigSet, for_env=None
     )
+
+
+def override_envlist(core: CoreConfigSet, env_list: EnvList) -> None:
+    core.loaders.insert(0, MemoryLoader(env_list=env_list))
+    if env_list == core["envlist"]:  # Config was not cached
+        return
+    logger.debug("expiring envlist cache to override")
+    # We need to expire cache explicitly otherwise the overridden envlist won't be
+    # read at all
+    core._defined["envlist"]._cache = _PLACE_HOLDER  # type: ignore
+    if env_list == core["envlist"]:  # Cleared the cache successfully
+        return
+    logger.error("failed to override envlist (tox's API might be changed?)")
 
 
 def get_factors(
