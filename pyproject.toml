@@ -11,7 +11,7 @@ requires = [
 build-backend = 'setuptools.build_meta'
 
 [tool.black]
-target-version = ["py27", "py35", "py36", "py37", "py38", "py39"]
+target-version = ["py27", "py35", "py36", "py37", "py38", "py39", "py310"]
 
 [tool.coverage.paths]
 # For combining source file paths correctly
