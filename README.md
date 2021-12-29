@@ -293,6 +293,10 @@ deps =
 ...
 ```
 
+_Changed in 3.0_: Environment variables should not use lowercase letters.
+Because of the limitation in tox's configuration loading API,
+tox-gh-actions always convert keys in `[gh-actions:env]` to uppercase.
+
 See [tox's documentation about factor-conditional settings](https://tox.readthedocs.io/en/latest/config.html#factors-and-factor-conditional-settings) as well.
 
 ### Overriding Environments to Run
