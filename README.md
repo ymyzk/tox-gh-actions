@@ -315,6 +315,6 @@ update their project's configuration too frequently.
 See [ARCHITECTURE.md](./ARCHITECTURE.md) for more details.
 
 ### Logging
-tox-gh-actions writes log messages using `tox.reporter`.
+tox-gh-actions writes log messages using the standard `logging` module.
 This is handy for understanding behavior of tox-gh-actions and for debugging tox-gh-actions.
 To see the log messages, please run `tox -vv`.
