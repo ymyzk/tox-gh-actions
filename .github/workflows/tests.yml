@@ -9,6 +9,7 @@ jobs:
   build:
     runs-on: ${{ matrix.platform }}
     strategy:
+      fail-fast: false
       matrix:
         # https://help.github.com/articles/virtual-environments-for-github-actions
         platform:
