@@ -2,7 +2,7 @@ name: Tests
 
 on:
   push:
-    branches: [master]
+    branches: [master, tox4]
   pull_request:
 
 jobs:
