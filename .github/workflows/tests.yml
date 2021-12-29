@@ -21,7 +21,7 @@ jobs:
         python-version: [2.7, 3.5, 3.6, 3.7, 3.8, 3.9, '3.10', pypy-2.7, pypy-3.6, pypy-3.7]
         exclude:
           # https://github.com/actions/setup-python/issues/311
-          - os: macos-latest
+          - platform: macos-latest
             python-version: pypy-3.6
 
     steps:
