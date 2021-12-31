@@ -30,7 +30,8 @@ please check [the tox4 branch](https://github.com/ymyzk/tox-gh-actions/tree/tox4
 ## Features
 When running tox on GitHub Actions, tox-gh-actions
 * detects which environment to run based on configurations and
-* provides utilities such as [grouping log lines](https://github.com/actions/toolkit/blob/main/docs/commands.md#group-and-ungroup-log-lines).
+* provides utilities such as [grouping log lines](https://github.com/actions/toolkit/blob/main/docs/commands.md#group-and-ungroup-log-lines)
+  and [annotating error messages](https://github.com/actions/toolkit/blob/main/docs/problem-matchers.md).
 
 ## Usage
 1. Add configurations under `[gh-actions]` section along with tox's configuration.

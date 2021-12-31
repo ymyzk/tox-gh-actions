@@ -1,9 +1,11 @@
 from itertools import product
+import json
 import os
 import sys
 import threading
 from typing import Any, Dict, Iterable, List
 
+import importlib_resources
 import pluggy
 from tox.action import Action
 from tox.config import Config, TestenvConfig, _split_env as split_env
@@ -53,6 +55,9 @@ def tox_configure(config):
     config.envlist_default = config.envlist = envlist
     verbosity1("overriding envlist with: {}".format(envlist))
 
+    verbosity2("enabling problem matcher")
+    print("::add-matcher::" + get_problem_matcher_file_path())
+
     if not is_log_grouping_enabled(config):
         verbosity2(
             "disabling log line grouping on GitHub Actions based on the configuration"
@@ -85,6 +90,13 @@ def tox_runtest_post(venv):
     # type: (VirtualEnv) -> None
     if is_log_grouping_enabled(venv.envconfig.config):
         print("::endgroup::")
+
+
+@hookimpl
+def tox_cleanup(session):
+    # This hook can be called multiple times especially when using parallel mode
+    for owner in get_problem_matcher_owners():
+        print("::remove-matcher owner={}::".format(owner))
 
 
 def start_grouping_if_necessary(venv):
@@ -248,6 +260,18 @@ def is_env_specified(config):
         # When command line argument (-e) is given
         return True
     return False
+
+
+def get_problem_matcher_file_path():
+    # type: () -> str
+    return str(importlib_resources.files("tox_gh_actions") / "matcher.json")
+
+
+def get_problem_matcher_owners():
+    # type: () -> List[str]
+    with open(get_problem_matcher_file_path()) as f:
+        matcher = json.load(f)
+    return [m["owner"] for m in matcher["problemMatcher"]]
 
 
 # The following function was copied from
