@@ -15,13 +15,16 @@ from tox.config.sets import ConfigSet, CoreConfigSet
 from tox.config.types import EnvList
 from tox.execute.api import Outcome
 from tox.plugin import impl
+from tox.session.state import State
 from tox.tox_env.api import ToxEnv
 
 logger = getLogger(__name__)
 
 
 @impl
-def tox_add_core_config(core_conf: ConfigSet, config: Config) -> None:
+def tox_add_core_config(core_conf: ConfigSet, state: State) -> None:
+    config = state.conf
+
     logger.info("running tox-gh-actions")
     if not is_running_on_actions():
         logger.warning(
@@ -209,11 +212,9 @@ def is_log_grouping_enabled(options: Parsed) -> bool:
 
 def is_env_specified(config: Config) -> bool:
     """Returns True when environments are explicitly given"""
-    if os.environ.get("TOXENV"):
-        # When TOXENV is a non-empty string
-        return True
-    elif hasattr(config.options, "env") and not config.options.env.use_default_list:
-        # When command line argument (-e) is given
+    if hasattr(config.options, "env") and not config.options.env.is_default_list:
+        # is_default_list becomes False when TOXENV is a non-empty string
+        # and when command line argument (-e) is given.
         return True
     return False
 
