@@ -15,13 +15,16 @@ from tox.config.sets import ConfigSet, CoreConfigSet
 from tox.config.types import EnvList
 from tox.execute.api import Outcome
 from tox.plugin import impl
+from tox.session.state import State
 from tox.tox_env.api import ToxEnv
 
 logger = getLogger(__name__)
 
 
 @impl
-def tox_add_core_config(core_conf: ConfigSet, config: Config) -> None:
+def tox_add_core_config(core_conf: ConfigSet, state: State) -> None:
+    config = state.conf
+
     logger.info("running tox-gh-actions")
     if not is_running_on_actions():
         logger.warning(
