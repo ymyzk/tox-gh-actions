@@ -19,6 +19,9 @@ source = [
    "*/site-packages",
 ]
 
+[tool.mypy]
+strict = true
+
 [tool.pytest.ini_options]
 markers = [
     "integration: mark as an integration test.",

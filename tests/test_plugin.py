@@ -1,4 +1,7 @@
+from typing import Any, Dict, Iterable, List, Tuple
+
 import pytest
+from pytest_mock import MockerFixture
 
 from tox_gh_actions import plugin
 
@@ -182,14 +185,20 @@ from tox_gh_actions import plugin
         ),
     ],
 )
-def test_get_factors(mocker, config, version, environ, expected):
+# TODO Improve type hints for config
+def test_get_factors(
+    mocker: MockerFixture,
+    config: Dict[str, Any],
+    version: List[str],
+    environ: Dict[str, str],
+    expected: List[str],
+) -> None:
     mocker.patch("tox_gh_actions.plugin.os.environ", environ)
     result = normalize_factors_list(plugin.get_factors(config, version))
-    expected = normalize_factors_list(expected)
-    assert result == expected
+    assert result == normalize_factors_list(expected)
 
 
-def normalize_factors_list(factors):
+def normalize_factors_list(factors: Iterable[str]) -> List[Tuple[str, ...]]:
     """Utility to make it compare equality of a list of factors"""
     result = [tuple(sorted(f.split("-"))) for f in factors]
     result.sort()
@@ -231,7 +240,9 @@ def normalize_factors_list(factors):
         ),
     ],
 )
-def test_get_envlist_from_factors(envlist, factors, expected):
+def test_get_envlist_from_factors(
+    envlist: List[str], factors: List[str], expected: List[str]
+) -> None:
     assert plugin.get_envlist_from_factors(envlist, factors) == expected
 
 
@@ -251,13 +262,18 @@ def test_get_envlist_from_factors(envlist, factors, expected):
         ),
     ],
 )
-def test_get_version_keys(mocker, version, info, expected):
+def test_get_version_keys(
+    mocker: MockerFixture,
+    version: str,
+    info: Tuple[int, int, int, str, int],
+    expected: List[str],
+) -> None:
     mocker.patch("tox_gh_actions.plugin.sys.version", version)
     mocker.patch("tox_gh_actions.plugin.sys.version_info", info)
     assert plugin.get_python_version_keys() == expected
 
 
-def test_get_version_keys_on_pyston(mocker):
+def test_get_version_keys_on_pyston(mocker: MockerFixture) -> None:
     mocker.patch(
         "tox_gh_actions.plugin.sys.pyston_version_info",
         (2, 2, 0, "final", 0),
@@ -283,6 +299,8 @@ def test_get_version_keys_on_pyston(mocker):
         ({}, False),
     ],
 )
-def test_is_running_on_actions(mocker, environ, expected):
+def test_is_running_on_actions(
+    mocker: MockerFixture, environ: Dict[str, str], expected: bool
+) -> None:
     mocker.patch("tox_gh_actions.plugin.os.environ", environ)
     assert plugin.is_running_on_actions() == expected
