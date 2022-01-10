@@ -95,6 +95,9 @@ def tox_runtest_post(venv):
 @hookimpl
 def tox_cleanup(session):
     # This hook can be called multiple times especially when using parallel mode
+    if not is_running_on_actions():
+        return
+    verbosity2("disabling problem matcher")
     for owner in get_problem_matcher_owners():
         print("::remove-matcher owner={}::".format(owner))
 
