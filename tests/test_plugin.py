@@ -402,7 +402,8 @@ def is_running_on_container_returns_false_on_non_linux(mocker):
 
 def is_running_on_container_returns_false_on_linux_host(mocker):
     mocker.patch("tox_gh_actions.plugin.os.path.exists", True)
-    mock_open = mocker.mock_open(read_data="""12:perf_event:/
+    mock_open = mocker.mock_open(
+        read_data="""12:perf_event:/
 11:devices:/init.scope
 10:cpu,cpuacct:/init.scope
 9:freezer:/
@@ -414,14 +415,16 @@ def is_running_on_container_returns_false_on_linux_host(mocker):
 3:net_cls,net_prio:/
 2:rdma:/
 1:name=systemd:/init.scope
-0::/init.scope""")
+0::/init.scope"""
+    )
     mocker.patch("tox_gh_actions.plugin.open", mock_open)
     assert plugin.is_running_on_container()
 
 
 def is_running_on_container_returns_true_on_linux_container(mocker):
     mocker.patch("tox_gh_actions.plugin.os.path.exists", True)
-    mock_open = mocker.mock_open(read_data="""12:pids:/actions_job/3d81
+    mock_open = mocker.mock_open(
+        read_data="""12:pids:/actions_job/3d81
 11:net_cls,net_prio:/actions_job/3d81
 10:devices:/actions_job/3d81
 9:freezer:/actions_job/3d81
@@ -433,7 +436,8 @@ def is_running_on_container_returns_true_on_linux_container(mocker):
 3:rdma:/
 2:hugetlb:/actions_job/3d81
 1:name=systemd:/actions_job/3d81
-0::/system.slice/containerd.service""")
+0::/system.slice/containerd.service"""
+    )
     mocker.patch("tox_gh_actions.plugin.open", mock_open)
     assert plugin.is_running_on_container()
 
