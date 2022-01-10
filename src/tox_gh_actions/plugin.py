@@ -55,8 +55,16 @@ def tox_configure(config):
     config.envlist_default = config.envlist = envlist
     verbosity1("overriding envlist with: {}".format(envlist))
 
-    verbosity2("enabling problem matcher")
-    print("::add-matcher::" + get_problem_matcher_file_path())
+    if is_running_on_container():
+        verbosity2(
+            "not enabling problem matcher as tox seems to be running on a container"
+        )
+        # Trying to add a problem matcher from a container without proper host mount can
+        # cause an error like the following:
+        # Unable to process command '::add-matcher::/.../matcher.json' successfully.
+    else:
+        verbosity2("enabling problem matcher")
+        print("::add-matcher::" + get_problem_matcher_file_path())
 
     if not is_log_grouping_enabled(config):
         verbosity2(
@@ -234,6 +242,21 @@ def is_running_on_actions():
     # See the following document on which environ to use for this purpose.
     # https://docs.github.com/en/free-pro-team@latest/actions/reference/environment-variables#default-environment-variables
     return os.environ.get("GITHUB_ACTIONS") == "true"
+
+
+def is_running_on_container():
+    # type: () -> bool
+    """Check whether tox is running on a container or not
+
+    Only Linux containers are supported.
+    """
+    cgroup_path = "/proc/1/cgroup"
+    if os.path.exists(cgroup_path):
+        with open(cgroup_path) as f:
+            for line in f:
+                if "containerd" in line:
+                    return True
+    return False
 
 
 def is_log_grouping_enabled(config):

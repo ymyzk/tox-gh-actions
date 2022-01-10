@@ -395,6 +395,49 @@ def test_is_running_on_actions(mocker, environ, expected):
     assert plugin.is_running_on_actions() == expected
 
 
+def is_running_on_container_returns_false_on_non_linux(mocker):
+    mocker.patch("tox_gh_actions.plugin.os.path.exists", False)
+    assert not plugin.is_running_on_container()
+
+
+def is_running_on_container_returns_false_on_linux_host(mocker):
+    mocker.patch("tox_gh_actions.plugin.os.path.exists", True)
+    mock_open = mocker.mock_open(read_data="""12:perf_event:/
+11:devices:/init.scope
+10:cpu,cpuacct:/init.scope
+9:freezer:/
+8:pids:/init.scope
+7:memory:/init.scope
+6:cpuset:/
+5:hugetlb:/
+4:blkio:/init.scope
+3:net_cls,net_prio:/
+2:rdma:/
+1:name=systemd:/init.scope
+0::/init.scope""")
+    mocker.patch("tox_gh_actions.plugin.open", mock_open)
+    assert plugin.is_running_on_container()
+
+
+def is_running_on_container_returns_true_on_linux_container(mocker):
+    mocker.patch("tox_gh_actions.plugin.os.path.exists", True)
+    mock_open = mocker.mock_open(read_data="""12:pids:/actions_job/3d81
+11:net_cls,net_prio:/actions_job/3d81
+10:devices:/actions_job/3d81
+9:freezer:/actions_job/3d81
+8:cpuset:/actions_job/3d81
+7:cpu,cpuacct:/actions_job/3d81
+6:memory:/actions_job/3d81
+5:blkio:/actions_job/3d81
+4:perf_event:/actions_job/3d81
+3:rdma:/
+2:hugetlb:/actions_job/3d81
+1:name=systemd:/actions_job/3d81
+0::/system.slice/containerd.service""")
+    mocker.patch("tox_gh_actions.plugin.open", mock_open)
+    assert plugin.is_running_on_container()
+
+
 @pytest.mark.parametrize(
     "environ,parallel,parallel_live,expected",
     [
