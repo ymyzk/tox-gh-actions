@@ -299,6 +299,17 @@ deps =
 
 See [tox's documentation about factor-conditional settings](https://tox.readthedocs.io/en/latest/config.html#factors-and-factor-conditional-settings) as well.
 
+#### tox requires
+If your project uses [tox's `requires` configuration](https://tox.wiki/en/latest/config.html#conf-requires),
+you must add tox-gh-actions` to the `requires` configuration as well. Otherwise, tox-gh-actions won't be loaded as a tox plugin.
+
+```ini
+[tox]
+requires =
+  tox-conda
+  tox-gh-actions
+```
+
 ### Overriding Environments to Run
 _Changed in 2.0_: When a list of environments to run is specified explicitly via `-e` option or `TOXENV` environment variable ([tox's help](https://tox.readthedocs.io/en/latest/example/general.html#selecting-one-or-more-environments-to-run-tests-against)),
 tox-gh-actions respects the given environments and simply runs the given environments without enforcing its configuration.
