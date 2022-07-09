@@ -21,6 +21,7 @@ please check [the tox4 branch](https://github.com/ymyzk/tox-gh-actions/tree/tox4
   - [Advanced Examples](#advanced-examples)
     - [Factor-Conditional Settings: Python Version](#factor-conditional-settings-python-version)
     - [Factor-Conditional Settings: Environment Variable](#factor-conditional-settings-environment-variable)
+    - [tox requires](#tox-requires)
   - [Overriding Environments to Run](#overriding-environments-to-run)
 - [Versioning](#versioning)
 - [Understanding Behavior of tox-gh-actions](#understanding-behavior-of-tox-gh-actions)
