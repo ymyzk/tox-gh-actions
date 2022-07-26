@@ -25,6 +25,23 @@ thread_locals.is_grouping_started = {}
 def tox_configure(config):
     # type: (Config) -> None
     verbosity1("running tox-gh-actions")
+
+    if is_running_on_container():
+        verbosity2(
+            "not enabling problem matcher as tox seems to be running on a container"
+        )
+        # Trying to add a problem matcher from a container without proper host mount can
+        # cause an error like the following:
+        # Unable to process command '::add-matcher::/.../matcher.json' successfully.
+    else:
+        verbosity2("enabling problem matcher")
+        print("::add-matcher::" + get_problem_matcher_file_path())
+
+    if not is_log_grouping_enabled(config):
+        verbosity2(
+            "disabling log line grouping on GitHub Actions based on the configuration"
+        )
+
     if not is_running_on_actions():
         verbosity1(
             "tox-gh-actions won't override envlist "
@@ -59,22 +76,6 @@ def tox_configure(config):
             "from envlist. Please use `tox -vv` to get more detailed logs."
         )
     verbosity1("overriding envlist with: {}".format(envlist))
-
-    if is_running_on_container():
-        verbosity2(
-            "not enabling problem matcher as tox seems to be running on a container"
-        )
-        # Trying to add a problem matcher from a container without proper host mount can
-        # cause an error like the following:
-        # Unable to process command '::add-matcher::/.../matcher.json' successfully.
-    else:
-        verbosity2("enabling problem matcher")
-        print("::add-matcher::" + get_problem_matcher_file_path())
-
-    if not is_log_grouping_enabled(config):
-        verbosity2(
-            "disabling log line grouping on GitHub Actions based on the configuration"
-        )
 
 
 @hookimpl
