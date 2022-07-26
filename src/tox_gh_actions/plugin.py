@@ -53,6 +53,11 @@ def tox_configure(config):
 
     envlist = get_envlist_from_factors(config.envlist, factors)
     config.envlist_default = config.envlist = envlist
+    if len(envlist) == 0:
+        warning(
+            "tox-gh-actions couldn't find environments matching the provided factors "
+            "from envlist. Please use `tox -vv` to get more detailed logs."
+        )
     verbosity1("overriding envlist with: {}".format(envlist))
 
     if is_running_on_container():
