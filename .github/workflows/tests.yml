@@ -16,7 +16,7 @@ jobs:
           - ubuntu-latest  # ubuntu-20.04
           - macos-latest  # macOS-11
           - windows-latest  # windows-2022
-        python-version: [2.7, 3.5, 3.6, 3.7, 3.8, 3.9, '3.10', 3.11-dev, pypy-2.7, pypy-3.7, pypy-3.8, pypy-3.9]
+        python-version: [2.7, 3.5, 3.6, 3.7, 3.8, 3.9, '3.10', '3.11', 3.12-dev, pypy-2.7, pypy-3.7, pypy-3.8, pypy-3.9]
 
     steps:
     - uses: actions/checkout@v3
@@ -40,12 +40,12 @@ jobs:
     - name: Test with tox
       run: tox
     - name: Upload coverage.xml
-      if: ${{ matrix.platform == 'ubuntu-latest' && matrix.python-version == '3.10' }}
+      if: ${{ matrix.platform == 'ubuntu-latest' && matrix.python-version == '3.11' }}
       uses: actions/upload-artifact@v3
       with:
         name: tox-gh-actions-coverage
         path: coverage.xml
         if-no-files-found: error
     - name: Upload coverage.xml to codecov
-      if: ${{ matrix.platform == 'ubuntu-latest' && matrix.python-version == '3.10' }}
+      if: ${{ matrix.platform == 'ubuntu-latest' && matrix.python-version == '3.11' }}
       uses: codecov/codecov-action@v2
