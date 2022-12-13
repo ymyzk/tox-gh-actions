@@ -21,6 +21,8 @@ please check [the tox4 branch](https://github.com/ymyzk/tox-gh-actions/tree/tox4
   - [Advanced Examples](#advanced-examples)
     - [Factor-Conditional Settings: Python Version](#factor-conditional-settings-python-version)
     - [Factor-Conditional Settings: Environment Variable](#factor-conditional-settings-environment-variable)
+    - [Fail when no environments are matched](#fail-when-no-environments-are-matched)
+    - [Disable problem matchers](#disable-problem-matchers)
     - [tox requires](#tox-requires)
   - [Overriding Environments to Run](#overriding-environments-to-run)
 - [Versioning](#versioning)
@@ -299,6 +301,40 @@ deps =
 ```
 
 See [tox's documentation about factor-conditional settings](https://tox.readthedocs.io/en/latest/config.html#factors-and-factor-conditional-settings) as well.
+
+#### Fail when no environments are matched
+By default, tox-gh-actions won't fail the run even if it cannot find environments matching the criteria.
+If you want to fail the run in such a case, you can tune the `fail_on_no_env` option.
+
+`tox.ini`:
+```ini
+[tox]
+envlist = py{38,39}
+
+[gh-actions]
+python =
+  3.8: py38
+  3.9: py39
+  # tox run using Python 3.10 will fail because tox-gh-actions cannot find an environment contains py310 in the envlist.
+  3.10: py310
+fail_on_no_env = True
+```
+
+#### Disable problem matchers
+For annotating error messages on GitHub Actions, tox-gh-actions uses [the problem matcher functionality](https://github.com/actions/toolkit/blob/main/docs/problem-matchers.md).
+However, there is a case that GitHub Actions reports an error like the following in certain environments.
+
+```
+Error: Could not find a part of the path '/usr/local/lib/python3.10/site-packages/tox_gh_actions/matcher.json'.
+```
+
+To prevent such errors, you can explicitly disable the problem matcher using the `problem_matcher` option.
+
+`tox.ini`:
+```ini
+[gh-actions]
+problem_matcher = False
+```
 
 #### tox requires
 If your project uses [tox's `requires` configuration](https://tox.wiki/en/latest/config.html#conf-requires),
