@@ -3,13 +3,13 @@ import json
 import os
 import sys
 import threading
-from typing import Any, Dict, Iterable, List
+from typing import Any, Dict, Iterable, List, NoReturn
 
 import importlib_resources
 import pluggy
 from tox.action import Action
 from tox.config import Config, TestenvConfig, _split_env as split_env
-from tox.reporter import verbosity1, verbosity2, warning
+from tox.reporter import verbosity1, verbosity2, warning, error
 from tox.venv import VirtualEnv
 
 
@@ -25,17 +25,6 @@ thread_locals.is_grouping_started = {}
 def tox_configure(config):
     # type: (Config) -> None
     verbosity1("running tox-gh-actions")
-
-    if is_running_on_container():
-        verbosity2(
-            "not enabling problem matcher as tox seems to be running on a container"
-        )
-        # Trying to add a problem matcher from a container without proper host mount can
-        # cause an error like the following:
-        # Unable to process command '::add-matcher::/.../matcher.json' successfully.
-    else:
-        verbosity2("enabling problem matcher")
-        print("::add-matcher::" + get_problem_matcher_file_path())
 
     if not is_log_grouping_enabled(config):
         verbosity2(
@@ -65,6 +54,22 @@ def tox_configure(config):
     gh_actions_config = parse_config(config._cfg.sections)
     verbosity2("tox-gh-actions config: {}".format(gh_actions_config))
 
+    if is_running_on_container():
+        verbosity2(
+            "not enabling problem matcher as tox seems to be running on a container"
+        )
+        # Trying to add a problem matcher from a container without proper host mount can
+        # cause an error like the following:
+        # Unable to process command '::add-matcher::/.../matcher.json' successfully.
+    elif not gh_actions_config["problem_matcher"]:
+        verbosity2(
+            "not enabling problem matcher as it's disabled by the problem_matcher "
+            "option"
+        )
+    else:
+        verbosity2("enabling problem matcher")
+        print("::add-matcher::" + get_problem_matcher_file_path())
+
     factors = get_factors(gh_actions_config, versions)
     verbosity2("using the following factors to decide envlist: {}".format(factors))
 
@@ -75,6 +80,9 @@ def tox_configure(config):
             "tox-gh-actions couldn't find environments matching the provided factors "
             "from envlist. Please use `tox -vv` to get more detailed logs."
         )
+        if gh_actions_config["fail_on_no_env"]:
+            error("Failing the run because the fail_on_no_env option is enabled.")
+            abort_tox()
     verbosity1("overriding envlist with: {}".format(envlist))
 
 
@@ -108,8 +116,11 @@ def tox_runtest_post(venv):
 
 @hookimpl
 def tox_cleanup(session):
+    gh_actions_config = parse_config(session.config._cfg.sections)
     # This hook can be called multiple times especially when using parallel mode
     if not is_running_on_actions():
+        return
+    if not gh_actions_config["problem_matcher"]:
         return
     verbosity2("disabling problem matcher")
     for owner in get_problem_matcher_owners():
@@ -148,15 +159,18 @@ def start_grouping_if_necessary(venv):
 def parse_config(config):
     # type: (Dict[str, Dict[str, str]]) -> Dict[str, Dict[str, Any]]
     """Parse gh-actions section in tox.ini"""
-    config_python = parse_dict(config.get("gh-actions", {}).get("python", ""))
+    main_config = config.get("gh-actions", {})
+    config_python = parse_dict(main_config.get("python", ""))
     config_env = {
         name: {k: split_env(v) for k, v in parse_dict(conf).items()}
         for name, conf in config.get("gh-actions:env", {}).items()
     }
-    # Example of split_env:
-    # "py{27,38}" => ["py27", "py38"]
     return {
+        # Example of split_env:
+        # "py{27,38}" => ["py27", "py38"]
         "python": {k: split_env(v) for k, v in config_python.items()},
+        "fail_on_no_env": parse_bool(main_config.get("fail_on_no_env", "false")),
+        "problem_matcher": parse_bool(main_config.get("problem_matcher", "true")),
         "env": config_env,
     }
 
@@ -304,6 +318,23 @@ def get_problem_matcher_owners():
     with open(get_problem_matcher_file_path()) as f:
         matcher = json.load(f)
     return [m["owner"] for m in matcher["problemMatcher"]]
+
+
+def parse_bool(value):
+    # type: (str) -> bool
+    """Parse a boolean value in the tox config."""
+    clean_value = value.strip().lower()
+    if clean_value in {"true", "1"}:
+        return True
+    elif clean_value in {"false", "0"}:
+        return False
+    error("Failed to parse a boolean value in tox-gh-actions config: {}")
+    abort_tox()
+
+
+def abort_tox():
+    # type: () -> NoReturn
+    raise SystemExit(1)
 
 
 # The following function was copied from

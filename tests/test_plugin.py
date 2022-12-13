@@ -56,13 +56,17 @@ def test_start_grouping_ignores_isolated_build_env(capsys, mocker):
                     "3.7": ["py37", "flake8"],
                 },
                 "env": {},
+                "fail_on_no_env": False,
+                "problem_matcher": True,
             },
         ),
         (
             {
                 "gh-actions": {
                     "python": """2.7: py27
-3.8: py38"""
+3.8: py38""",
+                    "fail_on_no_env": "True",
+                    "problem_matcher": "False",
                 },
                 "gh-actions:env": {
                     "PLATFORM": """ubuntu-latest: linux
@@ -82,6 +86,8 @@ windows-latest: windows"""
                         "windows-latest": ["windows"],
                     },
                 },
+                "fail_on_no_env": True,
+                "problem_matcher": False,
             },
         ),
         (
@@ -89,6 +95,8 @@ windows-latest: windows"""
             {
                 "python": {},
                 "env": {},
+                "fail_on_no_env": False,
+                "problem_matcher": True,
             },
         ),
         (
@@ -96,6 +104,8 @@ windows-latest: windows"""
             {
                 "python": {},
                 "env": {},
+                "fail_on_no_env": False,
+                "problem_matcher": True,
             },
         ),
     ],
