@@ -9,8 +9,13 @@
 with multiple different Python versions on multiple workers in parallel.
 This project is inspired by [tox-travis](https://github.com/tox-dev/tox-travis).
 
-*If you want to use this plugin with tox v4,
-please check [the tox4 branch](https://github.com/ymyzk/tox-gh-actions/tree/tox4).*
+## Versions and Compatibility
+Currently, tox-gh-actions supports both tox 3 and 4, but users need to install the appropriate version by following the table below.
+
+| tox | tox-gh-actions | Supported by tox-gh-actions | Branch                                                    |
+|-----|----------------|-----------------------------|-----------------------------------------------------------|
+| 4.x | 3.x            | Yes (beta)                  | [master](https://github.com/ymyzk/tox-gh-actions)         |
+| 3.x | 2.x            | Yes (stable)                | [tox3](https://github.com/ymyzk/tox-gh-actions/tree/tox3) |
 
 - [Features](#features)
 - [Usage](#usage)
@@ -126,7 +131,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install tox tox-gh-actions
+        python -m pip install tox<4 tox-gh-actions<3
     - name: Test with tox
       run: tox
 ```
@@ -264,7 +269,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install tox tox-gh-actions
+        python -m pip install tox<4 tox-gh-actions<3
     - name: Test with tox
       run: tox
       env:
