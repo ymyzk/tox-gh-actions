@@ -12,13 +12,13 @@ This project is inspired by [tox-travis](https://github.com/tox-dev/tox-travis).
 This branch is under active development to support tox v4.
 We're planning to release the stable version by the end of 2022.
 
-```shell
-$ pip install --pre tox-gh-actions
-```
+## Versions and Compatibility
+Currently, tox-gh-actions supports both tox 3 and 4, but users need to install the appropriate version by following the table below.
 
-## Support of tox 3
-If your project is using tox 3.x,
-please use [tox-gh-actions 2.x maintained under the tox3 branch](https://github.com/ymyzk/tox-gh-actions/tree/tox3).
+| tox | tox-gh-actions | Supported by tox-gh-actions | Branch                                                    |
+|-----|----------------|-----------------------------|-----------------------------------------------------------|
+| 4.x | 3.x            | Yes (beta)                  | [master](https://github.com/ymyzk/tox-gh-actions)         |
+| 3.x | 2.x            | Yes (stable)                | [tox3](https://github.com/ymyzk/tox-gh-actions/tree/tox3) |
 
 - [Features](#features)
 - [Usage](#usage)
@@ -132,7 +132,8 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install tox tox-gh-actions
+        python -m pip install tox
+        python -m pip install --pre tox-gh-actions
     - name: Test with tox
       run: tox
 ```
@@ -264,7 +265,8 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install tox tox-gh-actions
+        python -m pip install tox
+        python -m pip install --pre tox-gh-actions
     - name: Test with tox
       run: tox
       env:
