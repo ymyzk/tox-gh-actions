@@ -1,188 +1,140 @@
 from itertools import product
-import json
+
+from logging import getLogger
 import os
 import sys
-import threading
-from typing import Any, Dict, Iterable, List, NoReturn
+from typing import Any, Dict, Iterable, List
 
-import importlib_resources
-import pluggy
-from tox.action import Action
-from tox.config import Config, TestenvConfig, _split_env as split_env
-from tox.reporter import verbosity1, verbosity2, warning, error
-from tox.venv import VirtualEnv
+from tox.config.cli.parser import Parsed
+from tox.config.loader.memory import MemoryLoader
+from tox.config.loader.section import Section
+from tox.config.loader.str_convert import StrConvert
+from tox.config.main import Config
+from tox.config.of_type import _PLACE_HOLDER
+from tox.config.sets import ConfigSet, CoreConfigSet
+from tox.config.types import EnvList
+from tox.execute.api import Outcome
+from tox.plugin import impl
+from tox.session.state import State
+from tox.tox_env.api import ToxEnv
+
+logger = getLogger(__name__)
 
 
-hookimpl = pluggy.HookimplMarker("tox")
+@impl
+def tox_add_core_config(core_conf: ConfigSet, state: State) -> None:
+    config = state.conf
 
-# Using thread local for just in case tox uses multiple threads for execution.
-# tox seems to be using multiple processes at this point.
-thread_locals = threading.local()
-thread_locals.is_grouping_started = {}
-
-
-@hookimpl
-def tox_configure(config):
-    # type: (Config) -> None
-    verbosity1("running tox-gh-actions")
-
-    if not is_log_grouping_enabled(config):
-        verbosity2(
-            "disabling log line grouping on GitHub Actions based on the configuration"
-        )
-
+    logger.info("running tox-gh-actions")
     if not is_running_on_actions():
-        verbosity1(
-            "tox-gh-actions won't override envlist "
-            "because tox is not running in GitHub Actions"
+        logger.warning(
+            "tox-gh-actions won't override envlist because tox is not running "
+            "in GitHub Actions"
         )
         return
     elif is_env_specified(config):
-        verbosity1(
+        logger.warning(
             "tox-gh-actions won't override envlist because "
             "envlist is explicitly given via TOXENV or -e option"
         )
-        return
 
-    verbosity2("original envconfigs: {}".format(list(config.envconfigs.keys())))
-    verbosity2("original envlist_default: {}".format(config.envlist_default))
-    verbosity2("original envlist: {}".format(config.envlist))
+    original_envlist: EnvList = config.core["envlist"]
+    logger.debug("original envlist: %s", original_envlist.envs)
 
     versions = get_python_version_keys()
-    verbosity2("Python versions: {}".format(versions))
+    logger.debug("Python versions: {}".format(versions))
 
-    gh_actions_config = parse_config(config._cfg.sections)
-    verbosity2("tox-gh-actions config: {}".format(gh_actions_config))
-
-    if is_running_on_container():
-        verbosity2(
-            "not enabling problem matcher as tox seems to be running on a container"
-        )
-        # Trying to add a problem matcher from a container without proper host mount can
-        # cause an error like the following:
-        # Unable to process command '::add-matcher::/.../matcher.json' successfully.
-    elif not gh_actions_config["problem_matcher"]:
-        verbosity2(
-            "not enabling problem matcher as it's disabled by the problem_matcher "
-            "option"
-        )
-    else:
-        verbosity2("enabling problem matcher")
-        print("::add-matcher::" + get_problem_matcher_file_path())
+    gh_actions_config = load_config(config)
+    logger.debug("tox-gh-actions config: %s", gh_actions_config)
 
     factors = get_factors(gh_actions_config, versions)
-    verbosity2("using the following factors to decide envlist: {}".format(factors))
+    logger.debug("using the following factors to decide envlist: %s", factors)
 
-    envlist = get_envlist_from_factors(config.envlist, factors)
-    config.envlist_default = config.envlist = envlist
-    if len(envlist) == 0:
-        warning(
-            "tox-gh-actions couldn't find environments matching the provided factors "
-            "from envlist. Please use `tox -vv` to get more detailed logs."
+    envlist = get_envlist_from_factors(original_envlist.envs, factors)
+    override_envlist(config.core, EnvList(envlist))
+
+    if not is_log_grouping_enabled(config.options):
+        logger.debug(
+            "disabling log line grouping on GitHub Actions based on the configuration"
         )
-        if gh_actions_config["fail_on_no_env"]:
-            error("Failing the run because the fail_on_no_env option is enabled.")
-            abort_tox()
-    verbosity1("overriding envlist with: {}".format(envlist))
 
 
-@hookimpl
-def tox_testenv_create(venv, action):
-    # type: (VirtualEnv, Action) -> None
-    if is_log_grouping_enabled(venv.envconfig.config):
-        start_grouping_if_necessary(venv)
+@impl
+def tox_before_run_commands(tox_env: ToxEnv) -> None:
+    if is_log_grouping_enabled(tox_env.options):
+        message = tox_env.name
+        description = tox_env.conf["description"]  # type: str
+        if description:
+            message += " - " + description
+        print("::group::tox: " + message)
 
 
-@hookimpl
-def tox_testenv_install_deps(venv, action):
-    # type: (VirtualEnv, Action) -> None
-    if is_log_grouping_enabled(venv.envconfig.config):
-        start_grouping_if_necessary(venv)
-
-
-@hookimpl
-def tox_runtest_pre(venv):
-    # type: (VirtualEnv) -> None
-    if is_log_grouping_enabled(venv.envconfig.config):
-        start_grouping_if_necessary(venv)
-
-
-@hookimpl
-def tox_runtest_post(venv):
-    # type: (VirtualEnv) -> None
-    if is_log_grouping_enabled(venv.envconfig.config):
+@impl
+def tox_after_run_commands(
+    tox_env: ToxEnv, exit_code: int, outcomes: List[Outcome]
+) -> None:
+    if is_log_grouping_enabled(tox_env.options):
         print("::endgroup::")
 
 
-@hookimpl
-def tox_cleanup(session):
-    gh_actions_config = parse_config(session.config._cfg.sections)
-    # This hook can be called multiple times especially when using parallel mode
-    if not is_running_on_actions():
-        return
-    if not gh_actions_config["problem_matcher"]:
-        return
-    verbosity2("disabling problem matcher")
-    for owner in get_problem_matcher_owners():
-        print("::remove-matcher owner={}::".format(owner))
+class EmptyConfigSet(ConfigSet):
+    def register_config(self) -> None:
+        pass
 
 
-def start_grouping_if_necessary(venv):
-    # type: (VirtualEnv) -> None
-    """Start log line grouping when necessary.
+def load_config(config: Config) -> Dict[str, Dict[str, Any]]:
+    # It's better to utilize ConfigSet to parse gh-actions configuration but
+    # we use our custom configuration parser at this point for compatibility with
+    # the existing config files and limitations in ConfigSet API.
+    python_config = {}
+    for loader in load_config_section(config, "gh-actions").loaders:
+        if "python" not in loader.found_keys():
+            continue
+        python_config = parse_factors_dict(loader.load_raw("python", None, None))
 
-    This function can be called multiple times when running a test environment
-    and it ensures that "::group::" is written only once.
+    env = {}
+    for loader in load_config_section(config, "gh-actions:env").loaders:
+        for env_variable in loader.found_keys():
+            if env_variable.upper() in env:
+                continue
+            env[env_variable.upper()] = parse_factors_dict(
+                loader.load_raw(env_variable, None, None)
+            )
 
-    We shouldn't call this from tox_package and tox_get_python_executable hooks
-    because of the timing issue.
-    """
-    envconfig = venv.envconfig  # type: TestenvConfig
-    envname = envconfig.envname
-
-    # Do not enable grouping for an environment used for isolated build
-    # because we don't have a hook to write "::endgroup::" for this environment.
-    # TODO Make sure the exact condition when isolated_build_env is not set
-    if envname == getattr(envconfig.config, "isolated_build_env", ""):
-        return
-
-    if thread_locals.is_grouping_started.get(envname, False):
-        return
-    thread_locals.is_grouping_started[envname] = True
-
-    message = envname
-    if envconfig.description:
-        message += " - " + envconfig.description
-    print("::group::tox: " + message)
-
-
-def parse_config(config):
-    # type: (Dict[str, Dict[str, str]]) -> Dict[str, Dict[str, Any]]
-    """Parse gh-actions section in tox.ini"""
-    main_config = config.get("gh-actions", {})
-    config_python = parse_dict(main_config.get("python", ""))
-    config_env = {
-        name: {k: split_env(v) for k, v in parse_dict(conf).items()}
-        for name, conf in config.get("gh-actions:env", {}).items()
-    }
+    # TODO Use more precise type
     return {
-        # Example of split_env:
-        # "py{27,38}" => ["py27", "py38"]
-        "python": {k: split_env(v) for k, v in config_python.items()},
-        "fail_on_no_env": parse_bool(main_config.get("fail_on_no_env", "false")),
-        "problem_matcher": parse_bool(main_config.get("problem_matcher", "true")),
-        "env": config_env,
+        "python": python_config,
+        "env": env,
     }
 
 
-def get_factors(gh_actions_config, versions):
-    # type: (Dict[str, Dict[str, Any]], Iterable[str]) -> List[str]
+def load_config_section(config: Config, section_name: str) -> ConfigSet:
+    return config.get_section_config(
+        Section(None, section_name), base=[], of_type=EmptyConfigSet, for_env=None
+    )
+
+
+def override_envlist(core: CoreConfigSet, env_list: EnvList) -> None:
+    core.loaders.insert(0, MemoryLoader(env_list=env_list))
+    if env_list == core["envlist"]:  # Config was not cached
+        return
+    logger.debug("expiring envlist cache to override")
+    # We need to expire cache explicitly otherwise the overridden envlist won't be
+    # read at all
+    core._defined["envlist"]._cache = _PLACE_HOLDER  # type: ignore
+    if env_list == core["envlist"]:  # Cleared the cache successfully
+        return
+    logger.error("failed to override envlist (tox's API might be changed?)")
+
+
+def get_factors(
+    gh_actions_config: Dict[str, Dict[str, Any]], versions: Iterable[str]
+) -> List[str]:
     """Get a list of factors"""
-    factors = []  # type: List[List[str]]
+    factors: List[List[str]] = []
     for version in versions:
         if version in gh_actions_config["python"]:
-            show_deprecation_warning_for_old_style_pypy_config(version)
-            verbosity2("got factors for Python version: {}".format(version))
+            logger.debug("got factors for Python version: %s", version)
             factors.append(gh_actions_config["python"][version])
             break  # Shouldn't check remaining versions
     for env, env_config in gh_actions_config.get("env", {}).items():
@@ -193,29 +145,9 @@ def get_factors(gh_actions_config, versions):
     return [x for x in map(lambda f: "-".join(f), product(*factors)) if x]
 
 
-def show_deprecation_warning_for_old_style_pypy_config(version):
-    # type: (str) -> None
-    if version not in {"pypy2", "pypy3"}:
-        return
-    warning(
-        """PendingDeprecationWarning
-Support of old-style PyPy config keys will be removed in tox-gh-actions v3.
-Please use "pypy-2" and "pypy-3" instead of "pypy2" and "pypy3".
-
-Example of tox.ini:
-[gh-actions]
-python =
-    pypy-2: pypy2
-    pypy-3: pypy3
-    # The followings won't work with tox-gh-actions v3
-    # pypy2: pypy2
-    # pypy3: pypy3
-    """
-    )
-
-
-def get_envlist_from_factors(envlist, factors):
-    # type: (Iterable[str], Iterable[str]) -> List[str]
+def get_envlist_from_factors(
+    envlist: Iterable[str], factors: Iterable[str]
+) -> List[str]:
     """Filter envlist using factors"""
     result = []
     for env in envlist:
@@ -227,19 +159,13 @@ def get_envlist_from_factors(envlist, factors):
     return result
 
 
-def get_python_version_keys():
-    # type: () -> List[str]
+def get_python_version_keys() -> List[str]:
     """Get Python version in string for getting factors from gh-action's config
 
     Examples:
-    - CPython 2.7.z => [2.7, 2]
     - CPython 3.8.z => [3.8, 3]
-    - PyPy 2.7 (v7.3.z) => [pypy-2.7, pypy-2, pypy2]
     - PyPy 3.6 (v7.3.z) => [pypy-3.6, pypy-3, pypy3]
     - Pyston based on Python CPython 3.8.8 (v2.2) => [pyston-3.8, pyston-3]
-
-    Support of "pypy2" and "pypy3" is for backward compatibility with
-    tox-gh-actions v2.2.0 and before.
     """
     major_version = str(sys.version_info[0])
     major_minor_version = ".".join([str(i) for i in sys.version_info[:2]])
@@ -247,7 +173,6 @@ def get_python_version_keys():
         return [
             "pypy-" + major_minor_version,
             "pypy-" + major_version,
-            "pypy" + major_version,
         ]
     elif hasattr(sys, "pyston_version_info"):  # Pyston
         return [
@@ -259,82 +184,54 @@ def get_python_version_keys():
         return [major_minor_version, major_version]
 
 
-def is_running_on_actions():
-    # type: () -> bool
+def is_running_on_actions() -> bool:
     """Returns True when running on GitHub Actions"""
     # See the following document on which environ to use for this purpose.
     # https://docs.github.com/en/free-pro-team@latest/actions/reference/environment-variables#default-environment-variables
     return os.environ.get("GITHUB_ACTIONS") == "true"
 
 
-def is_running_on_container():
-    # type: () -> bool
-    """Check whether tox is running on a container or not
-
-    Only Linux containers are supported.
-    """
-    cgroup_path = "/proc/1/cgroup"
-    if os.path.exists(cgroup_path):
-        with open(cgroup_path) as f:
-            for line in f:
-                if "containerd" in line:
-                    return True
-    return False
-
-
-def is_log_grouping_enabled(config):
-    # type: (Config) -> bool
+def is_log_grouping_enabled(options: Parsed) -> bool:
     """Returns True when the plugin should enable log line grouping
 
-    This plugin won't enable grouping when both --parallel and --parallel-live are
-    enabled because log lines from different environments will be mixed.
+    This plugin won't enable grouping when --parallel is enabled
+    because log lines from different environments will be mixed.
     """
     if not is_running_on_actions():
         return False
-    if config.option.parallel > 1 and config.option.parallel_live:
+
+    # The parallel option is not always defined (e.g., `tox run`) so we should check
+    # its existence first.
+    # As --parallel-live option doesn't seems to be working correctly,
+    # this condition is more conservative compared to the plugin for tox 3.
+    if hasattr(options, "parallel") and options.parallel > 0:
         return False
+
     return True
 
 
-def is_env_specified(config):
-    # type: (Config) -> bool
+def is_env_specified(config: Config) -> bool:
     """Returns True when environments are explicitly given"""
-    if os.environ.get("TOXENV"):
-        # When TOXENV is a non-empty string
-        return True
-    elif config.option.env is not None:
-        # When command line argument (-e) is given
+    if hasattr(config.options, "env") and not config.options.env.is_default_list:
+        # is_default_list becomes False when TOXENV is a non-empty string
+        # and when command line argument (-e) is given.
         return True
     return False
 
 
-def get_problem_matcher_file_path():
-    # type: () -> str
-    return str(importlib_resources.files("tox_gh_actions") / "matcher.json")
+def parse_factors_dict(value: str) -> Dict[str, List[str]]:
+    """Parse a dict value from key to factors.
 
-
-def get_problem_matcher_owners():
-    # type: () -> List[str]
-    with open(get_problem_matcher_file_path()) as f:
-        matcher = json.load(f)
-    return [m["owner"] for m in matcher["problemMatcher"]]
-
-
-def parse_bool(value):
-    # type: (str) -> bool
-    """Parse a boolean value in the tox config."""
-    clean_value = value.strip().lower()
-    if clean_value in {"true", "1"}:
-        return True
-    elif clean_value in {"false", "0"}:
-        return False
-    error("Failed to parse a boolean value in tox-gh-actions config: {}")
-    abort_tox()
-
-
-def abort_tox():
-    # type: () -> NoReturn
-    raise SystemExit(1)
+    For example, this function converts an input
+        3.8: py38, docs
+        3.9: py39-django{2,3}
+    to a dict
+    {
+        "3.8": ["py38", "docs"],
+        "3.9": ["py39-django2", "py39-django3"],
+    }
+    """
+    return {k: StrConvert.to_env_list(v).envs for k, v in parse_dict(value).items()}
 
 
 # The following function was copied from
@@ -343,8 +240,7 @@ def abort_tox():
 # https://github.com/tox-dev/tox-travis/blob/0.12/LICENSE
 
 
-def parse_dict(value):
-    # type: (str) -> Dict[str, str]
+def parse_dict(value: str) -> Dict[str, str]:
     """Parse a dict value from the tox config.
     .. code-block: ini
         [travis]

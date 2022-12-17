@@ -3,21 +3,28 @@ requires = [
     # For PEP 517 and PEP 518 support
     # https://pip.pypa.io/en/stable/cli/pip/#pep-517-and-518-support
     # setuptools_scm v6 requires setuptools >= 45
-    "setuptools >= 40.8.0",
-    # Needs setuptools_scm v5 for Python <3.6
-    "setuptools_scm[toml] >= 5, <8",
+    "setuptools >= 45",
+    "setuptools_scm[toml] >= 6, <7",
     "wheel",
 ]
 build-backend = 'setuptools.build_meta'
 
 [tool.black]
-target-version = ["py35", "py36", "py37", "py38", "py39", "py310"]
+target-version = ["py37", "py38", "py39", "py310"]
 
 [tool.coverage.paths]
 # For combining source file paths correctly
 source = [
    "src",
    "*/site-packages",
+]
+
+[tool.mypy]
+strict = true
+
+[tool.pytest.ini_options]
+markers = [
+    "integration: mark as an integration test.",
 ]
 
 [tool.setuptools_scm]

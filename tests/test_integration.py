@@ -1,72 +1,103 @@
-from collections import defaultdict
-import os
-import shutil
-import subprocess
 import sys
 
 import pytest
+from pytest import MonkeyPatch
+from tox.pytest import ToxProjectCreator, init_fixture  # noqa: F401
 
 
-INT_TEST_DIR = os.path.join(os.path.dirname(__file__), "integration")
-
-
-@pytest.fixture(autouse=True)
-def precondition():
-    # Clean up files from previous integration tests
-    shutil.rmtree(os.path.join(INT_TEST_DIR, ".tox"), ignore_errors=True)
-    shutil.rmtree(os.path.join(INT_TEST_DIR, "out"), ignore_errors=True)
-
-    # Make sure tox and tox-gh-actions are installed
-    stdout = run_tox(["--version"])
-    assert "tox-gh-actions" in stdout.decode("utf-8")
+requires_cpython = pytest.mark.skipif(
+    sys.implementation.name != "cpython", reason="Requires CPython to run this test"
+)
 
 
 @pytest.mark.integration
-def test_integration():
-    expected_envs_map = defaultdict(
-        list,
-        [
-            ((2, 7), ["py27"]),
-            ((3, 9), ["py39"]),
-        ],
-    )
-    python_version = sys.version_info[:2]
-    # TODO Support non CPython implementation
-    if "PyPy" not in sys.version:
-        expected_envs = expected_envs_map[python_version]
-    else:
-        expected_envs = []
+@requires_cpython
+def test_sunny_day_with_legacy_command(
+    monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator
+) -> None:
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.delenv("TOXENV", raising=False)
+    env = f"py{sys.version_info[0]}{sys.version_info[1]}"
+    version = f"{sys.version_info[0]}.{sys.version_info[1]}"
+    tox_ini = f"""
+[tox]
+envlist = dummy, {env}
 
-    stdout = run_tox()
+[testenv]
+package = skip
 
-    assert_envs_executed(INT_TEST_DIR, expected_envs)
+[gh-actions]
+python =
+    2.6: dummy
+    {version}: {env}
+"""
+    project = tox_project({"tox.ini": tox_ini})
 
-    # Make sure to support both POSIX and Windows
-    stdout_lines = stdout.decode("utf-8").splitlines()
-    # TODO Assert ordering
-    for expected_env in expected_envs:
-        assert "::group::tox: " + expected_env in stdout_lines
-    if len(expected_envs) > 0:
-        assert "::endgroup::" in stdout_lines
+    result = project.run()
 
-
-def assert_envs_executed(root_dir, envs):
-    out_dir = os.path.join(root_dir, "out")
-    if os.path.isdir(out_dir):
-        out_envs = set(os.listdir(out_dir))
-    else:
-        out_envs = set()
-    expected_envs = set(envs)
-    assert out_envs == expected_envs
+    result.assert_success()
+    assert f"py{sys.version_info[0]}{sys.version_info[1]}: OK" in result.out
+    assert "dummy" not in result.out
 
 
-def run_tox(args=None):
-    if args is None:
-        args = []
-    env = os.environ.copy()
-    env["GITHUB_ACTIONS"] = "true"
-    return subprocess.check_output(
-        [sys.executable, "-m", "tox"] + args,
-        cwd=INT_TEST_DIR,
-        env=env,
-    )
+@pytest.mark.integration
+@requires_cpython
+def test_sunny_day_with_run_command(
+    monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator
+) -> None:
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.delenv("TOXENV", raising=False)
+    env = f"py{sys.version_info[0]}{sys.version_info[1]}"
+    version = f"{sys.version_info[0]}.{sys.version_info[1]}"
+    tox_ini = f"""
+[tox]
+envlist = dummy, {env}
+
+[testenv]
+package = skip
+
+[gh-actions]
+python =
+    2.6: dummy
+    {version}: {env}
+"""
+    project = tox_project({"tox.ini": tox_ini})
+
+    result = project.run("run")
+
+    result.assert_success()
+    assert f"py{sys.version_info[0]}{sys.version_info[1]}: OK" in result.out
+    assert "dummy" not in result.out
+
+
+@pytest.mark.integration
+@requires_cpython
+def test_sunny_day_with_list_command(
+    monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator
+) -> None:
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.delenv("TOXENV", raising=False)
+    env = f"py{sys.version_info[0]}{sys.version_info[1]}"
+    version = f"{sys.version_info[0]}.{sys.version_info[1]}"
+    tox_ini = f"""
+[tox]
+envlist = dummy, {env}
+
+[testenv]
+package = skip
+
+[gh-actions]
+python =
+    2.6: dummy
+    {version}: {env}
+"""
+    project = tox_project({"tox.ini": tox_ini})
+
+    result = project.run("list")
+
+    result.assert_success()
+    assert [
+        "default environments:",
+        f"py{sys.version_info[0]}{sys.version_info[1]} -> [no description]",
+        "",
+    ] == result.out.splitlines()[:3]
