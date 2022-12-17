@@ -3,7 +3,7 @@ name: Packaging
 on:
   # Make sure packaging process is not broken
   push:
-    branches: [master]
+    branches: [master, tox3]
   pull_request:
   # Make a package for release
   release:
