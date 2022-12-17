@@ -10,11 +10,15 @@ with multiple different Python versions on multiple workers in parallel.
 This project is inspired by [tox-travis](https://github.com/tox-dev/tox-travis).
 
 This branch is under active development to support tox v4.
-Preliminary support is already implemented.
-To try the plugin with tox v4, please run:
+We're planning to release the stable version by the end of 2022.
+
 ```shell
 $ pip install --pre tox-gh-actions
 ```
+
+## Support of tox 3
+If your project is using tox 3.x,
+please use [tox-gh-actions 2.x maintained under the tox3 branch](https://github.com/ymyzk/tox-gh-actions/tree/tox3).
 
 - [Features](#features)
 - [Usage](#usage)
