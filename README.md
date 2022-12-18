@@ -2,7 +2,7 @@
 
 [![PyPI version](https://badge.fury.io/py/tox-gh-actions.svg)](https://badge.fury.io/py/tox-gh-actions)
 [![PyPI Supported Python Versions](https://img.shields.io/pypi/pyversions/tox-gh-actions.svg)](https://pypi.python.org/pypi/tox-gh-actions/)
-[![GitHub Actions (Tests)](https://github.com/ymyzk/tox-gh-actions/workflows/Tests/badge.svg)](https://github.com/ymyzk/tox-gh-actions)
+[![GitHub Actions (Tests)](https://github.com/ymyzk/tox-gh-actions/actions/workflows/tests.yml/badge.svg?branch=tox3)](https://github.com/ymyzk/tox-gh-actions/actions/workflows/tests.yml)
 [![codecov](https://codecov.io/gh/ymyzk/tox-gh-actions/branch/master/graph/badge.svg?token=7RWjRk2LkX)](https://codecov.io/gh/ymyzk/tox-gh-actions)
 
 **tox-gh-actions** is a tox plugin which helps running tox on GitHub Actions
@@ -41,7 +41,7 @@ When running tox on GitHub Actions, tox-gh-actions
 
 ## Usage
 1. Add configurations under `[gh-actions]` section along with tox's configuration.
-   - It will be `pyproject.toml`, `tox.ini`, or `setup.cfg`. See [tox's documentation](https://tox.readthedocs.io/en/latest/config.html) for more details.
+   - It will be `pyproject.toml`, `tox.ini`, or `setup.cfg`. See [tox's documentation](https://tox.wiki/en/legacy/config.html) for more details.
 
 2. Install `tox-gh-actions` package in the GitHub Actions workflow before running `tox` command.
 
@@ -303,7 +303,7 @@ deps =
 ...
 ```
 
-See [tox's documentation about factor-conditional settings](https://tox.readthedocs.io/en/latest/config.html#factors-and-factor-conditional-settings) as well.
+See [tox's documentation about factor-conditional settings](https://tox.wiki/en/legacy/config.html#factors-and-factor-conditional-settings) as well.
 
 #### tox requires
 If your project uses [tox's `requires` configuration](https://tox.wiki/en/latest/config.html#conf-requires),
@@ -317,7 +317,7 @@ requires =
 ```
 
 ### Overriding Environments to Run
-_Changed in 2.0_: When a list of environments to run is specified explicitly via `-e` option or `TOXENV` environment variable ([tox's help](https://tox.readthedocs.io/en/latest/example/general.html#selecting-one-or-more-environments-to-run-tests-against)),
+_Changed in 2.0_: When a list of environments to run is specified explicitly via `-e` option or `TOXENV` environment variable ([tox's help](https://tox.wiki/en/legacy/example/general.html#selecting-one-or-more-environments-to-run-tests-against)),
 tox-gh-actions respects the given environments and simply runs the given environments without enforcing its configuration.
 
 Before 2.0, tox-gh-actions was always enforcing its configuration even when a list of environments is given explicitly.
