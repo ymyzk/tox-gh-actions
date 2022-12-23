@@ -4,7 +4,7 @@ requires = [
     # https://pip.pypa.io/en/stable/cli/pip/#pep-517-and-518-support
     # setuptools_scm v6 requires setuptools >= 45
     "setuptools >= 45",
-    "setuptools_scm[toml] >= 6, <7",
+    "setuptools_scm[toml] >= 7, <8",
     "wheel",
 ]
 build-backend = 'setuptools.build_meta'
