@@ -14,7 +14,7 @@ Currently, tox-gh-actions supports both tox 3 and 4, but users need to install t
 
 | tox | tox-gh-actions | Supported by tox-gh-actions | Branch                                                    |
 |-----|----------------|-----------------------------|-----------------------------------------------------------|
-| 4.x | 3.x            | Yes (beta)                  | [master](https://github.com/ymyzk/tox-gh-actions)         |
+| 4.x | 3.x            | Yes (stable)                | [master](https://github.com/ymyzk/tox-gh-actions)         |
 | 3.x | 2.x            | Yes (stable)                | [tox3](https://github.com/ymyzk/tox-gh-actions/tree/tox3) |
 
 - [Features](#features)
