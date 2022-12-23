@@ -9,15 +9,12 @@
 with multiple different Python versions on multiple workers in parallel.
 This project is inspired by [tox-travis](https://github.com/tox-dev/tox-travis).
 
-This branch is under active development to support tox v4.
-We're planning to release the stable version by the end of 2022.
-
 ## Versions and Compatibility
 Currently, tox-gh-actions supports both tox 3 and 4, but users need to install the appropriate version by following the table below.
 
 | tox | tox-gh-actions | Supported by tox-gh-actions | Branch                                                    |
 |-----|----------------|-----------------------------|-----------------------------------------------------------|
-| 4.x | 3.x            | Yes (beta)                  | [master](https://github.com/ymyzk/tox-gh-actions)         |
+| 4.x | 3.x            | Yes (stable)                | [master](https://github.com/ymyzk/tox-gh-actions)         |
 | 3.x | 2.x            | Yes (stable)                | [tox3](https://github.com/ymyzk/tox-gh-actions/tree/tox3) |
 
 - [Features](#features)
@@ -132,8 +129,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install tox
-        python -m pip install --pre tox-gh-actions
+        python -m pip install tox tox-gh-actions
     - name: Test with tox
       run: tox
 ```
@@ -265,8 +261,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install tox
-        python -m pip install --pre tox-gh-actions
+        python -m pip install tox tox-gh-actions
     - name: Test with tox
       run: tox
       env:
@@ -317,6 +312,8 @@ The major version can be also incremented when we require a new version of tox.
 
 This project tries not to introduce backward incompatibles changes as much as possible so that users don't need to
 update their project's configuration too frequently.
+
+tox-gh-actions 3.x may drop support of unsupported Python 3.y versions in the future without bumping its major version.
 
 ## Understanding Behavior of tox-gh-actions
 ### How tox-gh-actions Works
