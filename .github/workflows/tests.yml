@@ -8,6 +8,7 @@ on:
 jobs:
   build:
     runs-on: ${{ matrix.platform }}
+    continue-on-error: ${{ matrix.experimental }}
     strategy:
       fail-fast: false
       matrix:
@@ -16,7 +17,19 @@ jobs:
           - ubuntu-latest  # ubuntu-20.04
           - macos-latest  # macOS-11
           - windows-latest  # windows-2022
-        python-version: [3.7, 3.8, 3.9, '3.10', '3.11', 3.12-dev, pypy-3.7, pypy-3.8, pypy-3.9]
+        python-version: [3.7, 3.8, 3.9, '3.10', '3.11', pypy-3.7, pypy-3.8, pypy-3.9]
+        experimental: [false]
+        include:
+          - platform: ubuntu-latest
+            python-version: 3.12-dev
+            experimental: true
+          - platform: macos-latest
+            python-version: 3.12-dev
+            experimental: true
+          - platform: windows-latest
+            python-version: 3.12-dev
+            experimental: true
+
 
     steps:
     - uses: actions/checkout@v3
