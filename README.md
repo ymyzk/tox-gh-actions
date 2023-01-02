@@ -131,7 +131,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install tox<4 tox-gh-actions<3
+        python -m pip install 'tox<4' 'tox-gh-actions<3'
     - name: Test with tox
       run: tox
 ```
@@ -269,7 +269,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install tox<4 tox-gh-actions<3
+        python -m pip install 'tox<4' 'tox-gh-actions<3'
     - name: Test with tox
       run: tox
       env:
