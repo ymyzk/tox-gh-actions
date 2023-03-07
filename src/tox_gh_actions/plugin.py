@@ -202,10 +202,15 @@ def is_log_grouping_enabled(options: Parsed) -> bool:
 
     # The parallel option is not always defined (e.g., `tox run`) so we should check
     # its existence first.
-    # As --parallel-live option doesn't seems to be working correctly,
+    # As --parallel-live option doesn't seem to be working correctly,
     # this condition is more conservative compared to the plugin for tox 3.
-    if hasattr(options, "parallel") and options.parallel > 0:
-        return False
+    if hasattr(options, "parallel"):
+        if options.parallel > 0:
+            # Case for `tox p` or `tox -p <num>`
+            return False
+        elif options.parallel is None:
+            # Case for `tox -p`
+            return False
 
     return True
 
