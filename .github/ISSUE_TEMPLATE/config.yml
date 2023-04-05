@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and answers
+    url: https://github.com/ymyzk/tox-gh-actions/discussions
+    about: Please ask and answer usage questions in our discussion forum.
