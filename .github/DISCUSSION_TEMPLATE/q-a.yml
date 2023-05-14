@@ -1,0 +1,20 @@
+body:
+  - type: textarea
+    attributes:
+      label: Question
+      description: What questions do you have? What kind of problem are you facing?
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Context
+      description: |
+        If you need help for a specific project, please include
+
+        * GitHub Actions configuration
+        * tox and tox-gh-actions configuration
+        * Link to the GitHub Actions job if a repository is public
+  - type: textarea
+    attributes:
+      label: Aditional context
+      description: Add any other context about the problem here.
