@@ -211,6 +211,10 @@ def is_log_grouping_enabled(options: Parsed) -> bool:
         elif isinstance(options.parallel, int) and options.parallel > 0:
             # Case for `tox p` or `tox -p <num>`
             return False
+        elif isinstance(options.parallel, int) and options.parallel = 0:
+            # Case for `tox` or `tox -p 0`
+            # tox will disable the parallel execution
+            return True
         logger.warning(
             "tox-gh-actions couldn't understand the parallel option. "
             "ignoring the given option: %s",
