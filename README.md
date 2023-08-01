@@ -26,6 +26,7 @@ Currently, tox-gh-actions supports both tox 3 and 4, but users need to install t
   - [Advanced Examples](#advanced-examples)
     - [Factor-Conditional Settings: Python Version](#factor-conditional-settings-python-version)
     - [Factor-Conditional Settings: Environment Variable](#factor-conditional-settings-environment-variable)
+    - [tox requires](#tox-requires)
   - [Overriding Environments to Run](#overriding-environments-to-run)
 - [Versioning](#versioning)
 - [Understanding Behavior of tox-gh-actions](#understanding-behavior-of-tox-gh-actions)
@@ -297,6 +298,17 @@ deps =
 _Changed in 3.0_: Environment variables should not use lowercase letters.
 Because of the limitation in tox's configuration loading API,
 tox-gh-actions always convert keys in `[gh-actions:env]` to uppercase.
+
+#### tox requires
+If your project uses [tox's `requires` configuration](https://tox.wiki/en/latest/config.html#conf-requires),
+you must add tox-gh-actions` to the `requires` configuration as well. Otherwise, tox-gh-actions won't be loaded as a tox plugin.
+
+```ini
+[tox]
+requires =
+  tox-conda
+  tox-gh-actions
+```
 
 ### Overriding Environments to Run
 _Changed in 2.0_: When a list of environments to run is specified explicitly via `-e` option or `TOXENV` environment variable ([tox's help](https://tox.wiki/en/latest/cli_interface.html#tox-run--e)),
