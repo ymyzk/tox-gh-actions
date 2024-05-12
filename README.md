@@ -301,7 +301,7 @@ tox-gh-actions always convert keys in `[gh-actions:env]` to uppercase.
 
 #### tox requires
 If your project uses [tox's `requires` configuration](https://tox.wiki/en/latest/config.html#conf-requires),
-you must add tox-gh-actions` to the `requires` configuration as well. Otherwise, tox-gh-actions won't be loaded as a tox plugin.
+you must add `tox-gh-actions` to the `requires` configuration as well. Otherwise, tox-gh-actions won't be loaded as a tox plugin.
 
 ```ini
 [tox]
