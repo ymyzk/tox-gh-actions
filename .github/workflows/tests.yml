@@ -14,9 +14,18 @@ jobs:
         # https://help.github.com/articles/virtual-environments-for-github-actions
         platform:
           - ubuntu-latest  # ubuntu-22.04
-          - macos-latest  # macOS-12
+          - macos-13  # macos-13 (Intel)
+          - macos-latest  # macos-14 (M1)
           - windows-latest  # windows-2022
         python-version: [3.7, 3.8, 3.9, '3.10', 3.11, 3.12, pypy-3.7, pypy-3.8, pypy-3.9, pypy-3.10]
+        exclude:
+          # Exclude the following configuration to avoid an error.
+          # Error: The version '...' with architecture 'arm64' was not found for macOS 14.4.1.
+          # The list of all available versions can be found here: https://raw.githubusercontent.com/actions/python-versions/main/versions-manifest.json
+          - platform: macos-latest
+            python-version: 3.7
+          - platform: macos-latest
+            python-version: pypy-3.7
 
     steps:
     - uses: actions/checkout@v3
