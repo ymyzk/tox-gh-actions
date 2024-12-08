@@ -269,6 +269,13 @@ def test_get_envlist_from_factors(
             "t",
             ["3.13t", "3.13", "3"],
         ),
+        (
+            "3.13.0 experimental free-threading build (main, Oct 16 2024, 03:26:14) "
+            "[Clang 18.1.8 ]\n",
+            (3, 13, 0, "final", 0),
+            "td",
+            ["3.13td", "3.13t", "3.13dt", "3.13d", "3.13", "3"],
+        ),
     ],
 )
 def test_get_version_keys(

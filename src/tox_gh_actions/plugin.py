@@ -1,9 +1,10 @@
-from itertools import product
+from itertools import permutations, product
 
 from logging import getLogger
 import os
 import sys
-from typing import Any, Dict, Iterable, List
+import sysconfig
+from typing import Any, Dict, Iterable, Iterator, List, Tuple
 
 from tox.config.cli.parser import Parsed
 from tox.config.loader.memory import MemoryLoader
@@ -159,6 +160,47 @@ def get_envlist_from_factors(
     return result
 
 
+def get_abiflags() -> str:
+    """Return ABI flags as a string of character codes.
+
+    POSIX builds provide sys.abiflags. This function constructs
+    an equivalent character code sequence for Windows by
+    parsing the EXT_SUFFIX configuration variable.
+    """
+    try:
+        return sys.abiflags
+    except AttributeError:  # Windows
+        ext_suffix = sysconfig.get_config_var("EXT_SUFFIX")
+        if not ext_suffix:
+            return ""
+
+        # Looks like [_d].cp314[t]-win_amd64.pyd
+        prefix, cp3, suffix = ext_suffix.partition(".cp3")
+        if not cp3:  # Before Python 3.10, hard-coded as ".pyd"
+            return ""
+
+        abiflags = ""
+        if prefix == "_d":
+            abiflags += "d"
+
+        if suffix.split("-", 1).endswith("t"):
+            abiflags += "t"
+
+        return abiflags
+
+
+def permuted_combinations(seq: str) -> Iterator[Tuple[str, ...]]:
+    """Generate all combinations of any length and ordering.
+
+    >>> list(permuted_combinations("t"))
+    [(), ('t',)]
+    >>> list(permuted_combinations("td"))
+    [(), ('t',), ('d',), ('t', 'd'), ('d', 't')]
+    """
+    for n in range(len(seq) + 1):
+        yield from permutations(seq, n)
+
+
 def get_python_version_keys() -> List[str]:
     """Get Python version in string for getting factors from gh-action's config
 
@@ -181,10 +223,12 @@ def get_python_version_keys() -> List[str]:
         ]
     else:
         # Assume this is running on CPython
-        ret = [f"{major}.{minor}", f"{major}"]
-        if sys.abiflags:
-            ret.insert(0, f"{major}.{minor}{sys.abiflags}")
-        return ret
+        ret = [f"{major}"]
+        ret.extend(
+            f"{major}.{minor}{''.join(flags)}"
+            for flags in permuted_combinations(get_abiflags())
+        )
+        return sorted(ret, reverse=True)
 
 
 def is_running_on_actions() -> bool:
