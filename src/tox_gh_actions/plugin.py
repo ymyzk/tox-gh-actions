@@ -183,7 +183,7 @@ def get_abiflags() -> str:
         if prefix == "_d":
             abiflags += "d"
 
-        if suffix.split("-", 1).endswith("t"):
+        if suffix.split("-", 1)[0].endswith("t"):
             abiflags += "t"
 
         return abiflags
