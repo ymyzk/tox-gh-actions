@@ -164,24 +164,27 @@ def get_python_version_keys() -> List[str]:
 
     Examples:
     - CPython 3.8.z => [3.8, 3]
-    - PyPy 3.6 (v7.3.z) => [pypy-3.6, pypy-3, pypy3]
+    - PyPy 3.6 (v7.3.z) => [pypy-3.6, pypy-3]
     - Pyston based on Python CPython 3.8.8 (v2.2) => [pyston-3.8, pyston-3]
+    - CPython 3.13.z (free-threading build) => [3.13t, 3.13, 3]
     """
-    major_version = str(sys.version_info[0])
-    major_minor_version = ".".join([str(i) for i in sys.version_info[:2]])
+    major, minor = sys.version_info[:2]
     if "PyPy" in sys.version:
         return [
-            "pypy-" + major_minor_version,
-            "pypy-" + major_version,
+            f"pypy-{major}.{minor}",
+            f"pypy-{major}",
         ]
     elif hasattr(sys, "pyston_version_info"):  # Pyston
         return [
-            "pyston-" + major_minor_version,
-            "pyston-" + major_version,
+            f"pyston-{major}.{minor}",
+            f"pyston-{major}",
         ]
     else:
         # Assume this is running on CPython
-        return [major_minor_version, major_version]
+        ret = [f"{major}.{minor}", f"{major}"]
+        if sys.abiflags:
+            ret.insert(0, f"{major}.{minor}{sys.abiflags}")
+        return ret
 
 
 def is_running_on_actions() -> bool:
