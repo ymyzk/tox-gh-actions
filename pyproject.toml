@@ -9,6 +9,65 @@ requires = [
 ]
 build-backend = 'setuptools.build_meta'
 
+[project]
+name = "tox-gh-actions"
+description = "Seamless integration of tox into GitHub Actions"
+readme = "README.md"
+requires-python = ">=3.7"
+license = {text = "MIT"}
+authors = [
+    {name = "Yusuke Miyazaki", email = "miyazaki.dev@gmail.com"},
+]
+maintainers = [
+    {name = "Yusuke Miyazaki", email = "miyazaki.dev@gmail.com"},
+]
+keywords = ["tox", "github", "github-actions", "ci", "testing"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Framework :: tox",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Testing",
+    "Topic :: Utilities",
+    "Typing :: Typed",
+]
+dependencies = [
+    "tox >=4, <5",
+]
+dynamic = ["version"]
+
+[project.urls]
+Homepage = "https://github.com/ymyzk/tox-gh-actions"
+Issue = "https://github.com/ymyzk/tox-gh-actions/issues"
+Sponsor = "https://github.com/sponsors/ymyzk"
+
+[project.entry-points.tox]
+tox_gh_actions = "tox_gh_actions.plugin"
+
+[project.optional-dependencies]
+testing = [
+    "devpi-process",
+    "mypy; platform_python_implementation=='CPython'",
+    "pre-commit",
+    "pytest >=7",
+    "pytest-cov >=4",
+    "pytest-mock >=3",
+    "pytest-randomly >=3",
+]
+
 [tool.coverage.paths]
 # For combining source file paths correctly
 source = [
