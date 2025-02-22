@@ -10,12 +10,14 @@ with multiple different Python versions on multiple workers in parallel.
 This project is inspired by [tox-travis](https://github.com/tox-dev/tox-travis).
 
 ## Versions and Compatibility
-Currently, tox-gh-actions supports both tox 3 and 4, but users need to install the appropriate version by following the table below.
+We recommend to use the latest version of tox 4.x and tox-gh-actions 3.x.
+To use tox-gh-actions on tox 3.x, please install tox-gh-actions 2.x, not the latest release.
+The following table shows compatibility between tox and tox-gh-actions.
 
-| tox | tox-gh-actions | Supported by tox-gh-actions | Branch                                                    |
-|-----|----------------|-----------------------------|-----------------------------------------------------------|
-| 4.x | 3.x            | Yes (stable)                | [master](https://github.com/ymyzk/tox-gh-actions)         |
-| 3.x | 2.x            | Yes (stable)                | [tox3](https://github.com/ymyzk/tox-gh-actions/tree/tox3) |
+| tox | tox-gh-actions | Supported by tox-gh-actions  | Branch                                                    |
+ |-----|----------------|------------------------------|-----------------------------------------------------------|
+| 4.x | 3.x            | Yes (stable)                 | [master](https://github.com/ymyzk/tox-gh-actions)         |
+| 3.x | 2.x            | Only security fixes (stable) | [tox3](https://github.com/ymyzk/tox-gh-actions/tree/tox3) |
 
 - [Features](#features)
 - [Usage](#usage)
