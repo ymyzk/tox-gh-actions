@@ -8,6 +8,8 @@ on:
 jobs:
   build:
     runs-on: ${{ matrix.platform }}
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -33,7 +35,6 @@ jobs:
             python-version: 3.7
           - platform: windows-latest
             python-version: pypy-3.9
-
     steps:
     - uses: actions/checkout@v4
       if: ${{ ! startsWith(matrix.python-version, 'pypy-') }}
