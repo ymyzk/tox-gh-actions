@@ -11,12 +11,10 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: [3.13]
-
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.python-version }}
@@ -24,13 +22,47 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
-      run: |
-        python -m pip install --upgrade build twine
+      run: python -m pip install --upgrade build
     - name: Create packages
       run: python -m build
-    - name: Run twine check
-      run: twine check dist/*
     - uses: actions/upload-artifact@v4
       with:
         name: tox-gh-actions-dist
         path: dist
+
+  pypi-publish:
+    needs:
+      - build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+    environment: pypi
+    permissions:
+      id-token: write # Required for using pypa/gh-actions-pypi-publish
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: tox-gh-actions-dist
+          path: dist
+      - name: Publish package distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+
+  github-release:
+    needs:
+      - build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+    environment: release
+    permissions:
+      contents: write # Required for uploading artifacts to GitHub release
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: tox-gh-actions-dist
+          path: dist
+      - name: Upload artifacts to GitHub release
+        working-directory: ./dist
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ github.event.release.tag_name }}" ./*
