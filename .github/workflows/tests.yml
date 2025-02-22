@@ -18,6 +18,9 @@ jobs:
           - macos-latest  # macos-14 (M1)
           - windows-latest  # windows-2022
         python-version: [3.7, 3.8, 3.9, '3.10', 3.11, 3.12, 3.13, pypy-3.7, pypy-3.8, pypy-3.9, pypy-3.10]
+        include:
+          - platform: ubuntu-22.04
+            python-version: 3.7
         exclude:
           # Exclude the following configuration to avoid an error.
           # Error: The version '...' with architecture 'arm64' was not found for macOS 14.4.1.
@@ -26,6 +29,10 @@ jobs:
             python-version: 3.7
           - platform: macos-latest
             python-version: pypy-3.7
+          - platform: ubuntu-latest
+            python-version: 3.7
+          - platform: windows-latest
+            python-version: pypy-3.9
 
     steps:
     - uses: actions/checkout@v3
@@ -50,7 +57,7 @@ jobs:
       run: tox
     - name: Upload coverage.xml
       if: ${{ matrix.platform == 'ubuntu-latest' && matrix.python-version == '3.13' }}
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: tox-gh-actions-coverage
         path: coverage.xml
