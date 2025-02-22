@@ -13,11 +13,11 @@ jobs:
       matrix:
         # https://help.github.com/articles/virtual-environments-for-github-actions
         platform:
-          - ubuntu-latest  # ubuntu-22.04
+          - ubuntu-latest  # ubuntu-24.04
           - macos-13  # macos-13 (Intel)
           - macos-latest  # macos-14 (M1)
           - windows-latest  # windows-2022
-        python-version: [3.7, 3.8, 3.9, '3.10', 3.11, 3.12, pypy-3.7, pypy-3.8, pypy-3.9, pypy-3.10]
+        python-version: [3.7, 3.8, 3.9, '3.10', 3.11, 3.12, 3.13, pypy-3.7, pypy-3.8, pypy-3.9, pypy-3.10]
         exclude:
           # Exclude the following configuration to avoid an error.
           # Error: The version '...' with architecture 'arm64' was not found for macOS 14.4.1.
@@ -49,12 +49,12 @@ jobs:
     - name: Test with tox
       run: tox
     - name: Upload coverage.xml
-      if: ${{ matrix.platform == 'ubuntu-latest' && matrix.python-version == '3.12' }}
+      if: ${{ matrix.platform == 'ubuntu-latest' && matrix.python-version == '3.13' }}
       uses: actions/upload-artifact@v3
       with:
         name: tox-gh-actions-coverage
         path: coverage.xml
         if-no-files-found: error
     - name: Upload coverage.xml to codecov
-      if: ${{ matrix.platform == 'ubuntu-latest' && matrix.python-version == '3.12' }}
+      if: ${{ matrix.platform == 'ubuntu-latest' && matrix.python-version == '3.13' }}
       uses: codecov/codecov-action@v2
