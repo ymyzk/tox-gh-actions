@@ -45,7 +45,7 @@ jobs:
       # listdir('/home/runner/work/tox-gh-actions/tox-gh-actions/.tox/dist/
       # warnings.warn(f\'"{wd.path}" is shallow and may cause errors\')',)
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
