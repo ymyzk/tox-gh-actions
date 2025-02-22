@@ -1,5 +1,4 @@
 from itertools import product
-
 from logging import getLogger
 import os
 import sys
@@ -42,7 +41,7 @@ def tox_add_core_config(core_conf: ConfigSet, state: State) -> None:
     logger.debug("original envlist: %s", original_envlist.envs)
 
     versions = get_python_version_keys()
-    logger.debug("Python versions: {}".format(versions))
+    logger.debug("Python versions: %s", versions)
 
     gh_actions_config = load_config(config)
     logger.debug("tox-gh-actions config: %s", gh_actions_config)
@@ -166,6 +165,7 @@ def get_python_version_keys() -> List[str]:
     - CPython 3.8.z => [3.8, 3]
     - PyPy 3.6 (v7.3.z) => [pypy-3.6, pypy-3, pypy3]
     - Pyston based on Python CPython 3.8.8 (v2.2) => [pyston-3.8, pyston-3]
+
     """
     major_version = str(sys.version_info[0])
     major_minor_version = ".".join([str(i) for i in sys.version_info[:2]])
@@ -226,11 +226,9 @@ def is_log_grouping_enabled(options: Parsed) -> bool:
 
 def is_env_specified(config: Config) -> bool:
     """Returns True when environments are explicitly given"""
-    if hasattr(config.options, "env") and not config.options.env.is_default_list:
-        # is_default_list becomes False when TOXENV is a non-empty string
-        # and when command line argument (-e) is given.
-        return True
-    return False
+    # is_default_list becomes False when TOXENV is a non-empty string
+    # and when command line argument (-e) is given.
+    return hasattr(config.options, "env") and not config.options.env.is_default_list
 
 
 def parse_factors_dict(value: str) -> Dict[str, List[str]]:
@@ -256,6 +254,7 @@ def parse_factors_dict(value: str) -> Dict[str, List[str]]:
 
 def parse_dict(value: str) -> Dict[str, str]:
     """Parse a dict value from the tox config.
+
     .. code-block: ini
         [travis]
         python =
