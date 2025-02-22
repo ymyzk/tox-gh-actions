@@ -9,14 +9,6 @@
 with multiple different Python versions on multiple workers in parallel.
 This project is inspired by [tox-travis](https://github.com/tox-dev/tox-travis).
 
-## Versions and Compatibility
-Currently, tox-gh-actions supports both tox 3 and 4, but users need to install the appropriate version by following the table below.
-
-| tox | tox-gh-actions | Supported by tox-gh-actions | Branch                                                    |
-|-----|----------------|-----------------------------|-----------------------------------------------------------|
-| 4.x | 3.x            | Yes (stable)                | [master](https://github.com/ymyzk/tox-gh-actions)         |
-| 3.x | 2.x            | Yes (stable)                | [tox3](https://github.com/ymyzk/tox-gh-actions/tree/tox3) |
-
 - [Features](#features)
 - [Usage](#usage)
 - [Examples](#examples)
@@ -29,6 +21,7 @@ Currently, tox-gh-actions supports both tox 3 and 4, but users need to install t
     - [tox requires](#tox-requires)
   - [Overriding Environments to Run](#overriding-environments-to-run)
 - [Versioning](#versioning)
+- [Versions and Compatibility](#versions-and-compatibility)
 - [Understanding Behavior of tox-gh-actions](#understanding-behavior-of-tox-gh-actions)
   - [How tox-gh-actions Works](#how-tox-gh-actions-works)
   - [Logging](#logging)
@@ -326,6 +319,16 @@ This project tries not to introduce backward incompatibles changes as much as po
 update their project's configuration too frequently.
 
 tox-gh-actions 3.x may drop support of unsupported Python 3.y versions in the future without bumping its major version.
+
+## Versions and Compatibility
+We recommend to use the latest version of tox 4.x and tox-gh-actions 3.x.
+To use tox-gh-actions with tox 3.x, please install tox-gh-actions 2.x.
+The following table shows compatibility between tox and tox-gh-actions.
+
+| tox | tox-gh-actions | Supported by tox-gh-actions  | Branch                                                    |
+|-----|----------------|------------------------------|-----------------------------------------------------------|
+| 4.x | 3.x            | Yes (stable)                 | [master](https://github.com/ymyzk/tox-gh-actions)         |
+| 3.x | 2.x            | Only security fixes (stable) | [tox3](https://github.com/ymyzk/tox-gh-actions/tree/tox3) |
 
 ## Understanding Behavior of tox-gh-actions
 ### How tox-gh-actions Works
