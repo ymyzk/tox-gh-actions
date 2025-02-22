@@ -1,9 +1,10 @@
-from itertools import product
+from itertools import permutations, product
 
 from logging import getLogger
 import os
 import sys
-from typing import Any, Dict, Iterable, List
+import sysconfig
+from typing import Any, Dict, Iterable, Iterator, List, Tuple
 
 from tox.config.cli.parser import Parsed
 from tox.config.loader.memory import MemoryLoader
@@ -159,29 +160,75 @@ def get_envlist_from_factors(
     return result
 
 
+def get_abiflags() -> str:
+    """Return ABI flags as a string of character codes.
+
+    POSIX builds provide sys.abiflags. This function constructs
+    an equivalent character code sequence for Windows by
+    parsing the EXT_SUFFIX configuration variable.
+    """
+    try:
+        return sys.abiflags
+    except AttributeError:  # Windows
+        ext_suffix = sysconfig.get_config_var("EXT_SUFFIX")
+        if not ext_suffix:
+            return ""
+
+        # Looks like [_d].cp314[t]-win_amd64.pyd
+        prefix, cp3, suffix = ext_suffix.partition(".cp3")
+        if not cp3:  # Before Python 3.10, hard-coded as ".pyd"
+            return ""
+
+        abiflags = ""
+        if prefix == "_d":
+            abiflags += "d"
+
+        if suffix.split("-", 1)[0].endswith("t"):
+            abiflags += "t"
+
+        return abiflags
+
+
+def permuted_combinations(seq: str) -> Iterator[Tuple[str, ...]]:
+    """Generate all combinations of any length and ordering.
+
+    >>> list(permuted_combinations("t"))
+    [(), ('t',)]
+    >>> list(permuted_combinations("td"))
+    [(), ('t',), ('d',), ('t', 'd'), ('d', 't')]
+    """
+    for n in range(len(seq) + 1):
+        yield from permutations(seq, n)
+
+
 def get_python_version_keys() -> List[str]:
     """Get Python version in string for getting factors from gh-action's config
 
     Examples:
     - CPython 3.8.z => [3.8, 3]
-    - PyPy 3.6 (v7.3.z) => [pypy-3.6, pypy-3, pypy3]
+    - PyPy 3.6 (v7.3.z) => [pypy-3.6, pypy-3]
     - Pyston based on Python CPython 3.8.8 (v2.2) => [pyston-3.8, pyston-3]
+    - CPython 3.13.z (free-threading build) => [3.13t, 3.13, 3]
     """
-    major_version = str(sys.version_info[0])
-    major_minor_version = ".".join([str(i) for i in sys.version_info[:2]])
+    major, minor = sys.version_info[:2]
     if "PyPy" in sys.version:
         return [
-            "pypy-" + major_minor_version,
-            "pypy-" + major_version,
+            f"pypy-{major}.{minor}",
+            f"pypy-{major}",
         ]
     elif hasattr(sys, "pyston_version_info"):  # Pyston
         return [
-            "pyston-" + major_minor_version,
-            "pyston-" + major_version,
+            f"pyston-{major}.{minor}",
+            f"pyston-{major}",
         ]
     else:
         # Assume this is running on CPython
-        return [major_minor_version, major_version]
+        ret = [f"{major}"]
+        ret.extend(
+            f"{major}.{minor}{''.join(flags)}"
+            for flags in permuted_combinations(get_abiflags())
+        )
+        return sorted(ret, reverse=True)
 
 
 def is_running_on_actions() -> bool:
