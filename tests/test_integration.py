@@ -4,7 +4,6 @@ import pytest
 from pytest import MonkeyPatch
 from tox.pytest import ToxProjectCreator, init_fixture  # noqa: F401
 
-
 requires_cpython = pytest.mark.skipif(
     sys.implementation.name != "cpython", reason="Requires CPython to run this test"
 )

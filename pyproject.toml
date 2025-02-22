@@ -9,9 +9,6 @@ requires = [
 ]
 build-backend = 'setuptools.build_meta'
 
-[tool.black]
-target-version = ["py37", "py38", "py39", "py310", "py311"]
-
 [tool.coverage.paths]
 # For combining source file paths correctly
 source = [
@@ -25,6 +22,59 @@ strict = true
 [tool.pytest.ini_options]
 markers = [
     "integration: mark as an integration test.",
+]
+
+[tool.ruff]
+target-version = "py37"
+
+[tool.ruff.lint]
+select = [
+    # pycodestyle
+    "E",
+    "W",
+    # Pyflakes
+    "F",
+    # pydocstyle
+    "D",
+    # isort
+    "I",
+    # pyupgrade
+    "UP",
+    # flake8-annotations
+    "ANN",
+    # flake8-bandit
+    "S",
+    # flake8-bugbear
+    "B",
+    # flake8-implicit-str-concat
+    "ISC",
+    # flake8-logging
+    "LOG",
+    # flake8-logging-format
+    "G",
+    # flake8-simplify
+    "SIM",
+    # Ruff-specific rules
+    "RUF",
+]
+ignore = [
+    "D100",
+    "D101",
+    "D102",
+    "D103",
+    "D104",
+    "D400",
+    "D401",
+    "D415",
+]
+
+[tool.ruff.lint.isort]
+force-sort-within-sections = true
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = [
+    # flake8-bandit: assert
+    "S101",
 ]
 
 [tool.setuptools_scm]
