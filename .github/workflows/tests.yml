@@ -35,9 +35,9 @@ jobs:
             python-version: pypy-3.9
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       if: ${{ ! startsWith(matrix.python-version, 'pypy-') }}
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4
       if: ${{ startsWith(matrix.python-version, 'pypy-') }}
       # Using actions/checkout@v2 or later with pypy causes an error
       # https://foss.heptapod.net/pypy/pypy/-/issues/3640
