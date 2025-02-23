@@ -65,4 +65,4 @@ jobs:
         if-no-files-found: error
     - name: Upload coverage.xml to codecov
       if: ${{ matrix.platform == 'ubuntu-latest' && matrix.python-version == '3.13' }}
-      uses: codecov/codecov-action@v5
+      uses: codecov/codecov-action@13ce06bfc6bbe3ecf90edbbf1bc32fe5978ca1d3 # v5.3.1
