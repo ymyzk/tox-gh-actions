@@ -2,6 +2,7 @@ from itertools import product
 from logging import getLogger
 import os
 import sys
+import sysconfig
 from typing import Any, Dict, Iterable, List
 
 from tox.config.cli.parser import Parsed
@@ -163,25 +164,27 @@ def get_python_version_keys() -> List[str]:
 
     Examples:
     - CPython 3.8.z => [3.8, 3]
+    - CPython 3.14.z free-threading build => [3.14t, 3t]
     - PyPy 3.6 (v7.3.z) => [pypy-3.6, pypy-3, pypy3]
     - Pyston based on Python CPython 3.8.8 (v2.2) => [pyston-3.8, pyston-3]
 
     """
     major_version = str(sys.version_info[0])
     major_minor_version = ".".join([str(i) for i in sys.version_info[:2]])
+    suffix = "t" if sysconfig.get_config_var("Py_GIL_DISABLED") == 1 else ""
     if "PyPy" in sys.version:
         return [
-            "pypy-" + major_minor_version,
-            "pypy-" + major_version,
+            "pypy-" + major_minor_version + suffix,
+            "pypy-" + major_version + suffix,
         ]
     elif hasattr(sys, "pyston_version_info"):  # Pyston
         return [
-            "pyston-" + major_minor_version,
-            "pyston-" + major_version,
+            "pyston-" + major_minor_version + suffix,
+            "pyston-" + major_version + suffix,
         ]
     else:
         # Assume this is running on CPython
-        return [major_minor_version, major_version]
+        return [major_minor_version + suffix, major_version + suffix]
 
 
 def is_running_on_actions() -> bool:

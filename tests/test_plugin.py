@@ -247,17 +247,26 @@ def test_get_envlist_from_factors(
 
 
 @pytest.mark.parametrize(
-    "version,info,expected",
+    "version,info,gil,expected",
     [
+        (
+            "3.14.0 free-threading build (main, Oct  7 2025, 09:34:52)"
+            " [Clang 17.0.0 (clang-1700.3.19.1)]",
+            (3, 14, 0, "final", 0),
+            1,
+            ["3.14t", "3t"],
+        ),
         (
             "3.8.1 (default, Jan 22 2020, 06:38:00) \n[GCC 9.2.0]",
             (3, 8, 1, "final", 0),
+            0,
             ["3.8", "3"],
         ),
         (
             "3.6.9 (1608da62bfc7, Dec 23 2019, 10:50:04)\n"
             "[PyPy 7.3.0 with GCC 7.3.1 20180303 (Red Hat 7.3.1-5)]",
             (3, 6, 9, "final", 0),
+            0,
             ["pypy-3.6", "pypy-3"],
         ),
     ],
@@ -265,11 +274,13 @@ def test_get_envlist_from_factors(
 def test_get_version_keys(
     mocker: MockerFixture,
     version: str,
+    gil: int,
     info: Tuple[int, int, int, str, int],
     expected: List[str],
 ) -> None:
     mocker.patch("tox_gh_actions.plugin.sys.version", version)
     mocker.patch("tox_gh_actions.plugin.sys.version_info", info)
+    mocker.patch("tox_gh_actions.plugin.sysconfig.get_config_var", return_value=gil)
     assert plugin.get_python_version_keys() == expected
 
 

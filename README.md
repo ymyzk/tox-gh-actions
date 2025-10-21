@@ -174,6 +174,22 @@ python =
 ...
 ```
 
+_Added in 3.5.0_: To use a free-threaded Python build, add the `t` suffix.
+
+ `tox.ini`:
+```ini
+[tox]
+envlist = py314, py314t
+
+[gh-actions]
+python =
+    3.14: py314
+    3.14t: py314t
+
+[testenv]
+...
+```
+
 PyPy is also supported in the `python` configuration key.
 Support of Pyston is experimental and not tested by our CI.
 
