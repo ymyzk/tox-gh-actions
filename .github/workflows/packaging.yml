@@ -41,7 +41,7 @@ jobs:
       id-token: write # Required for using pypa/gh-actions-pypi-publish
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v7
         with:
           name: tox-gh-actions-dist
           path: dist
@@ -58,7 +58,7 @@ jobs:
       contents: write # Required for uploading artifacts to GitHub release
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v7
         with:
           name: tox-gh-actions-dist
           path: dist
