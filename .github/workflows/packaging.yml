@@ -24,7 +24,7 @@ jobs:
       run: python -m pip install --upgrade build
     - name: Create packages
       run: python -m build
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v6
       with:
         name: tox-gh-actions-dist
         path: dist
