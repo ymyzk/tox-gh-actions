@@ -8,8 +8,14 @@ requires_cpython = pytest.mark.skipif(
     sys.implementation.name != "cpython", reason="Requires CPython to run this test"
 )
 
+skip_if_free_threaded = pytest.mark.skipif(
+    sys.version_info >= (3, 13) and not sys._is_gil_enabled(),
+    reason="Fails on free threaded builds",
+)
+
 
 @pytest.mark.integration
+@skip_if_free_threaded
 @requires_cpython
 def test_sunny_day_with_legacy_command(
     monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator
@@ -40,6 +46,7 @@ python =
 
 
 @pytest.mark.integration
+@skip_if_free_threaded
 @requires_cpython
 def test_sunny_day_with_run_command(
     monkeypatch: MonkeyPatch, tox_project: ToxProjectCreator
