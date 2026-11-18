@@ -10,7 +10,6 @@ from tox.config.loader.memory import MemoryLoader
 from tox.config.loader.section import Section
 from tox.config.loader.str_convert import StrConvert
 from tox.config.main import Config
-from tox.config.of_type import _PLACE_HOLDER
 from tox.config.sets import ConfigSet, CoreConfigSet
 from tox.config.types import EnvList
 from tox.execute.api import Outcome
@@ -119,9 +118,19 @@ def override_envlist(core: CoreConfigSet, env_list: EnvList) -> None:
     if env_list == core["envlist"]:  # Config was not cached
         return
     logger.debug("expiring envlist cache to override")
-    # We need to expire cache explicitly otherwise the overridden envlist won't be
+    # We need to replace cache explicitly otherwise the overridden envlist won't be
     # read at all
-    core._defined["envlist"]._cache = _PLACE_HOLDER  # type: ignore
+    definition = core._defined["envlist"]
+    if hasattr(definition, "overwrite"):
+        # tox >= 4.58.0 provides an API to replace a loaded value
+        definition.overwrite(env_list)
+    else:
+        # tox < 4.58.0 (_PLACE_HOLDER was removed in tox 4.67.14)
+        from tox.config.of_type import (  # type: ignore[attr-defined,unused-ignore]
+            _PLACE_HOLDER,
+        )
+
+        definition._cache = _PLACE_HOLDER  # type: ignore
     if env_list == core["envlist"]:  # Cleared the cache successfully
         return
     logger.error("failed to override envlist (tox's API might be changed?)")
