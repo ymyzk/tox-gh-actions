@@ -42,6 +42,11 @@ jobs:
             python-version: pypy-3.9
           - platform: windows-latest
             python-version: graalpy-25
+          # GraalPy stopped publishing macOS x64 builds after 25.0.1. On macos-15-intel,
+          # graalpy-25 resolves to 25.0.1, whose ssl module is unusable by the pip
+          # seeded into tox environments.
+          - platform: macos-15-intel
+            python-version: graalpy-25
     steps:
     - uses: actions/checkout@v6
     - name: Set up Python ${{ matrix.python-version }}
