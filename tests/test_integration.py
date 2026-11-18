@@ -1,3 +1,4 @@
+from itertools import takewhile
 import sys
 
 import pytest
@@ -95,8 +96,9 @@ python =
     result = project.run("list")
 
     result.assert_success()
+    # tox < 4.39 also lists keys of the [gh-actions] section as "additional
+    # environments" after a blank line, so only compare the first block.
     assert [
         "default environments:",
         f"py{sys.version_info[0]}{sys.version_info[1]} -> [no description]",
-        "",
-    ] == result.out.splitlines()[:3]
+    ] == list(takewhile(bool, result.out.splitlines()))
