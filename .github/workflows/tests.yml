@@ -58,9 +58,7 @@ jobs:
       run: |
         python -m pip install --upgrade setuptools pip wheel
         # Use the latest published version for myself :)
-        # tox-gh-actions <= 3.5.0 fails to import on tox >= 4.67.14.
-        # TODO: Remove the tox pin once a fixed tox-gh-actions is released.
-        python -m pip install --pre tox-gh-actions "tox<4.67.14"
+        python -m pip install --pre tox-gh-actions
     - name: Test with tox
       run: tox
     - name: Upload coverage.xml
