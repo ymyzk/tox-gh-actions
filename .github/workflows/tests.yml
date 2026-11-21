@@ -13,13 +13,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # https://help.github.com/articles/virtual-environments-for-github-actions
+        # https://docs.github.com/en/actions/reference/runners/github-hosted-runners#standard-github-hosted-runners-for-public-repositories
         platform:
           - ubuntu-latest  # ubuntu-26.04
-          - macos-15-intel  # macos-15 (Intel)
-          - macos-latest  # macos-15 (Apple Silicon ARM)
+          - macos-26-intel  # macos-26 (Intel)
+          - macos-latest  # macos-26 (Apple Silicon ARM)
           - windows-latest  # windows-2025
-        python-version: [3.8, 3.9, '3.10', 3.11, 3.12, 3.13, 3.14, pypy-3.8, pypy-3.9, pypy-3.10, pypy-3.11, graalpy-25]
+        python-version: [3.8, 3.9, '3.10', 3.11, 3.12, 3.13, 3.14, 3.15, pypy-3.8, pypy-3.9, pypy-3.10, pypy-3.11, pypy-3.12, graalpy-25]
         include:
           - platform: ubuntu-22.04
             python-version: 3.7
@@ -42,10 +42,10 @@ jobs:
             python-version: pypy-3.9
           - platform: windows-latest
             python-version: graalpy-25
-          # GraalPy stopped publishing macOS x64 builds after 25.0.1. On macos-15-intel,
+          # GraalPy stopped publishing macOS x64 builds after 25.0.1. On macos-26-intel,
           # graalpy-25 resolves to 25.0.1, whose ssl module is unusable by the pip
           # seeded into tox environments.
-          - platform: macos-15-intel
+          - platform: macos-26-intel
             python-version: graalpy-25
     steps:
     - uses: actions/checkout@v6
@@ -62,12 +62,12 @@ jobs:
     - name: Test with tox
       run: tox
     - name: Upload coverage.xml
-      if: ${{ matrix.platform == 'ubuntu-latest' && matrix.python-version == '3.14' }}
+      if: ${{ matrix.platform == 'ubuntu-latest' && matrix.python-version == '3.15' }}
       uses: actions/upload-artifact@v7
       with:
         name: tox-gh-actions-coverage
         path: coverage.xml
         if-no-files-found: error
     - name: Upload coverage.xml to codecov
-      if: ${{ matrix.platform == 'ubuntu-latest' && matrix.python-version == '3.14' }}
+      if: ${{ matrix.platform == 'ubuntu-latest' && matrix.python-version == '3.15' }}
       uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
