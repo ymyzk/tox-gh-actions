@@ -169,31 +169,28 @@ def get_envlist_from_factors(
 
 
 def get_python_version_keys() -> List[str]:
-    """Get Python version in string for getting factors from gh-action's config
+    """Get version keys from the most specific to the least specific.
 
     Examples:
-    - CPython 3.8.z => [3.8, 3]
-    - CPython 3.14.z free-threading build => [3.14t, 3t]
-    - PyPy 3.6 (v7.3.z) => [pypy-3.6, pypy-3, pypy3]
-    - Pyston based on Python CPython 3.8.8 (v2.2) => [pyston-3.8, pyston-3]
+    - CPython 3.8.1 => [3.8.1, 3.8, 3]
+    - CPython 3.14.0 free-threading build => [3.14.0t, 3.14t, 3t]
+    - PyPy implementing Python 3.6.9 => [pypy-3.6.9, pypy-3.6, pypy-3]
+    - Pyston implementing Python 3.8.8 => [pyston-3.8.8, pyston-3.8, pyston-3]
 
     """
-    major_version = str(sys.version_info[0])
-    major_minor_version = ".".join([str(i) for i in sys.version_info[:2]])
+    major, minor, patch = sys.version_info[:3]
     suffix = "t" if sysconfig.get_config_var("Py_GIL_DISABLED") == 1 else ""
     if "PyPy" in sys.version:
-        return [
-            "pypy-" + major_minor_version + suffix,
-            "pypy-" + major_version + suffix,
-        ]
-    elif hasattr(sys, "pyston_version_info"):  # Pyston
-        return [
-            "pyston-" + major_minor_version + suffix,
-            "pyston-" + major_version + suffix,
-        ]
+        prefix = "pypy-"
+    elif hasattr(sys, "pyston_version_info"):
+        prefix = "pyston-"
     else:
-        # Assume this is running on CPython
-        return [major_minor_version + suffix, major_version + suffix]
+        prefix = ""
+    return [
+        f"{prefix}{major}.{minor}.{patch}{suffix}",
+        f"{prefix}{major}.{minor}{suffix}",
+        f"{prefix}{major}{suffix}",
+    ]
 
 
 def is_running_on_actions() -> bool:

@@ -228,9 +228,11 @@ python =
 ...
 ```
 
-If there are multiple matching Python versions in the configuration, only the most precise one is used.
-For example, if you are running CPython 3.14 and `gh-actions.python` has both `3` and `3.14`,
-tox-gh-actions gets factors only from the key `3.14`.
+You can also specify a patch version, such as `3.10.8`, `3.14.0t`, or `pypy-3.11.9`.
+For PyPy and Pyston, use the Python language version they implement.
+Only the most precise matching key is used. For example, with `3`, `3.10`, and `3.10.8`
+configured, CPython 3.10.8 uses `3.10.8`, CPython 3.10.9 uses `3.10`,
+and CPython 3.11 uses `3`.
 
 _Changed in 3.0_: `pypy3` is not supported in the configuration anymore. Please use `pypy-3` instead.
 

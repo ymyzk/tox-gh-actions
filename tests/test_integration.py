@@ -1,4 +1,3 @@
-from itertools import takewhile
 import sys
 
 import pytest
@@ -88,17 +87,12 @@ package = skip
 
 [gh-actions]
 python =
-    2.6: dummy
-    {version}: {env}
+    {version}: dummy
+    {version}.{sys.version_info[2]}: {env}
 """
     project = tox_project({"tox.ini": tox_ini})
 
-    result = project.run("list")
+    result = project.run("list", "-d", "--no-desc")
 
     result.assert_success()
-    # tox < 4.39 also lists keys of the [gh-actions] section as "additional
-    # environments" after a blank line, so only compare the first block.
-    assert [
-        "default environments:",
-        f"py{sys.version_info[0]}{sys.version_info[1]} -> [no description]",
-    ] == list(takewhile(bool, result.out.splitlines()))
+    assert result.out.splitlines() == [env]
