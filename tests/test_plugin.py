@@ -254,20 +254,20 @@ def test_get_envlist_from_factors(
             " [Clang 17.0.0 (clang-1700.3.19.1)]",
             (3, 14, 0, "final", 0),
             1,
-            ["3.14t", "3t"],
+            ["3.14.0t", "3.14t", "3t"],
         ),
         (
             "3.8.1 (default, Jan 22 2020, 06:38:00) \n[GCC 9.2.0]",
             (3, 8, 1, "final", 0),
             0,
-            ["3.8", "3"],
+            ["3.8.1", "3.8", "3"],
         ),
         (
             "3.6.9 (1608da62bfc7, Dec 23 2019, 10:50:04)\n"
             "[PyPy 7.3.0 with GCC 7.3.1 20180303 (Red Hat 7.3.1-5)]",
             (3, 6, 9, "final", 0),
             0,
-            ["pypy-3.6", "pypy-3"],
+            ["pypy-3.6.9", "pypy-3.6", "pypy-3"],
         ),
     ],
 )
@@ -299,7 +299,12 @@ def test_get_version_keys_on_pyston(mocker: MockerFixture) -> None:
         "tox_gh_actions.plugin.sys.version_info",
         (3, 8, 8, "final", 0),
     )
-    assert plugin.get_python_version_keys() == ["pyston-3.8", "pyston-3"]
+    mocker.patch("tox_gh_actions.plugin.sysconfig.get_config_var", return_value=0)
+    assert plugin.get_python_version_keys() == [
+        "pyston-3.8.8",
+        "pyston-3.8",
+        "pyston-3",
+    ]
 
 
 @pytest.mark.parametrize(
