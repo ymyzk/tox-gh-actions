@@ -48,7 +48,7 @@ jobs:
           - platform: macos-15-intel
             python-version: graalpy-25
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v7
       with:
